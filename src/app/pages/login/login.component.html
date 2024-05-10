@@ -1,0 +1,347 @@
+<div
+  class="card flex justify-content-center align-items-center w-screen h-screen"
+>
+  <p-card
+    header="Đăng nhập"
+    subheader="Nhập tên người dùng và mật khẩu để đăng nhập"
+    [style]="{ width: '380px' }"
+    styleClass="shadow-2"
+  >
+    <form [formGroup]="loginFormGroup">
+      <div class="login-input-container flex gap-3 flex-column">
+        <div class="username" class="w-full">
+          <label for="username">Username:</label>
+          <p-iconField iconPosition="left" id="username">
+            <p-inputIcon styleClass="pi pi-user" />
+            <input
+              class="w-full"
+              autofocus
+              id="username"
+              type="text"
+              pInputText
+              formControlName="username"
+              placeholder="Tên người dùng"
+              (click)="setLoginValidator(false, loginInfoValidator.isEmptyPassword,false, loginInfoValidator.incorrectPassword, this.loginInfoValidator.message)"
+              [ngClass]="{'enable-validation' : this.loginInfoValidator.isEmptyUsername}"
+            />
+          </p-iconField>
+          <div class="error-container mt-1">
+            <ng-container *ngFor="let validation of validations.username">
+              <div
+                class="error-message text-sm"
+                *ngIf="
+                  loginFormGroup.get('username')?.hasError(validation.type) &&
+                  (loginFormGroup.get('username')?.dirty ||
+                    loginFormGroup.get('username')?.touched)
+                  && loginInfoValidator.isEmptyUsername
+                "
+              >
+                <i class="pi pi-info-circle mr-1"></i>
+                <span>{{ validation.message }}</span>
+              </div>
+            </ng-container>
+            <div
+            class="error-message text-sm mt-1"
+            *ngIf="loginInfoValidator.incorrectUsername"
+          >
+            <i class="pi pi-info-circle mr-1"></i>
+            <span>{{ loginInfoValidator.message }}</span>
+          </div>
+          </div>
+        </div>
+        <div class="password">
+          <label for="password">Password:</label>
+          <p-iconField iconPosition="left">
+            <p-inputIcon styleClass="pi pi-lock" />
+            <input
+              class="w-full"
+              id="password"
+              type="password"
+              pInputText
+              formControlName="password"
+              placeholder="Mật khẩu"
+              (click)="setLoginValidator(loginInfoValidator.isEmptyUsername, false, loginInfoValidator.incorrectUsername, false, this.loginInfoValidator.message)"
+              [ngClass]="{'enable-validation' : this.loginInfoValidator.isEmptyPassword}"
+            />
+          </p-iconField>
+          <div class="error-container mt-1">
+            <ng-container *ngFor="let validation of validations.password">
+              <div
+                class="error-message text-sm"
+                *ngIf="
+                  loginFormGroup.get('password')?.hasError(validation.type) &&
+                  (loginFormGroup.get('password')?.dirty ||
+                    loginFormGroup.get('password')?.touched)
+                  && loginInfoValidator.isEmptyPassword
+                "
+              >
+                <i class="pi pi-info-circle mr-1"></i>
+                <span>{{ validation.message }}</span>
+              </div>
+            </ng-container>
+            <div
+              class="error-message text-sm mt-1"
+              *ngIf="loginInfoValidator.incorrectPassword"
+            >
+              <i class="pi pi-info-circle mr-1"></i>
+              <span>{{ loginInfoValidator.message }}</span>
+            </div>
+          </div>
+        </div>
+        <span
+          class="forgot-password font-semibold text-sm inline"
+          (click)="showResetPasswordModel()"
+        >
+          Quên mật khẩu?
+        </span>
+      </div>
+    </form>
+    <ng-template pTemplate="footer">
+      <p-button
+        label="Đăng nhập"
+        [rounded]="true"
+        [loading]="loading"
+        styleClass="w-full"
+        (onClick)="login()"
+      ></p-button>
+    </ng-template>
+  </p-card>
+</div>
+
+<p-dialog
+  header="Khôi phục mật khẩu"
+  [modal]="true"
+  [(visible)]="resetPasswordModel.isVisibleResetPasswordModel"
+  [style]="{'width' : '50vw'}"
+>
+
+  <p-stepper [(activeStep)]="resetPasswordModel.active">
+    <p-stepperPanel>
+      <!-- STEP 01 -->
+      <ng-template pTemplate="header" let-onClick="onClick" let-index="index">
+        <button
+          class="bg-transparent border-none inline-flex flex-column gap-2"
+          (onClick)="onClick.emit()"
+        >
+          <span
+            class="border-round border-2 w-3rem h-3rem inline-flex align-items-center justify-content-center"
+            [ngClass]="{
+              'bg-primary border-primary': index <= resetPasswordModel.active,
+              'surface-border': index > resetPasswordModel.active
+            }"
+          >
+            <i class="pi pi-user"></i>
+          </span>
+        </button>
+      </ng-template>
+      <ng-template pTemplate="content" let-nextCallback="nextCallback">
+        <div
+          class="flex flex-column gap-2 mx-auto"
+          style="min-height: 12rem; max-width: 22rem"
+        >
+          <div class="text-center mt-3 mb-3 text-xl font-semibold">
+            Nhập tên người dùng và email
+          </div>
+          <form [formGroup]="forgetPasswordFormGroup">
+            <div class="field p-fluid">
+              <p-iconField>
+                <p-inputIcon>
+                  <i class="pi pi-user"></i>
+                </p-inputIcon>
+                <input pInputText id="input" type="text" placeholder="Tên người dùng" formControlName="username"
+                (click)="patchForgetPasswordValidator({isEmptyUsername: false, isIncorrectUsername: false})"
+                autofocus
+                />
+              </p-iconField>
+              <div class="error-container mt-1">
+                <ng-container *ngFor="let validation of validations.username">
+                  <div
+                    class="error-message text-sm"
+                    *ngIf="
+                      forgetPasswordFormGroup.get('username')?.hasError(validation.type) &&
+                      (forgetPasswordFormGroup.get('username')?.dirty ||
+                      forgetPasswordFormGroup.get('username')?.touched)
+                      && forgetPasswordValidator.isEmptyUsername"
+                  >
+                    <i class="pi pi-info-circle mr-1"></i>
+                    <span>{{ validation.message }}</span>
+                  </div>
+                </ng-container>
+                <div
+                class="error-message text-sm mt-1"
+                *ngIf="forgetPasswordValidator.isIncorrectUsername"
+              >
+                <i class="pi pi-info-circle mr-1"></i>
+                <span>{{ forgetPasswordValidator.message }}</span>
+              </div>
+              </div>
+            </div>
+            <div class="field p-fluid">
+              <p-iconField>
+                <p-inputIcon>
+                  <i class="pi pi-envelope"></i>
+                </p-inputIcon>
+                <input pInputText id="email" type="email" placeholder="Email" formControlName="email" (click)="patchForgetPasswordValidator({isEmptyEmail: false, isWrongEmailFormat: false, isIncorrectEmail: false})"/>
+              </p-iconField>
+              <div class="error-container mt-1">
+                <ng-container *ngFor="let validation of validations.email">
+                  <div
+                    class="error-message text-sm"
+                    *ngIf="
+                      forgetPasswordFormGroup.get('email')?.hasError(validation.type) &&
+                      (forgetPasswordFormGroup.get('email')?.dirty ||
+                      forgetPasswordFormGroup.get('email')?.touched) && (forgetPasswordValidator.isEmptyEmail || forgetPasswordValidator.isWrongEmailFormat)
+                     "
+                  >
+                    <i class="pi pi-info-circle mr-1"></i>
+                    <span>{{ validation.message }}</span>
+                  </div>
+                </ng-container>
+                <div
+                class="error-message text-sm mt-1"
+                *ngIf="forgetPasswordValidator.isIncorrectEmail"
+              >
+                <i class="pi pi-info-circle mr-1"></i>
+                <span>{{ forgetPasswordValidator.message }}</span>
+              </div>
+              </div>
+            </div>
+          </form>
+        </div>
+        <div class="flex pt-1 justify-content-end">
+          <p-button
+            (onClick)="forgetPasswordHandler(nextCallback)"
+            label="Tiếp tục"
+            icon="pi pi-arrow-right"
+            iconPos="right"
+            size="small"
+            [loading]="loading"
+          />
+        </div>
+      </ng-template>
+      <!-- END STEP 01 -->
+    </p-stepperPanel>
+    <p-stepperPanel>
+      <!-- STEP 02 -->
+      <ng-template pTemplate="header" let-onClick="onClick" let-index="index">
+        <button
+          class="bg-transparent border-none inline-flex flex-column gap-2"
+          (onClick)="onClick.emit()"
+        >
+          <span
+            class="border-round border-2 w-3rem h-3rem inline-flex align-items-center justify-content-center"
+            [ngClass]="{
+              'bg-primary border-primary': index <= resetPasswordModel.active,
+              'surface-border': index > resetPasswordModel.active
+            }"
+          >
+            <i class="pi pi-lock"></i>
+          </span>
+        </button>
+      </ng-template>
+      <ng-template
+        pTemplate="content"
+        let-prevCallback="prevCallback"
+        let-nextCallback="nextCallback"
+      >
+        <div
+          class="flex flex-column gap-2 mx-auto"
+          style="min-height: 12rem; max-width: 20rem"
+        >
+          <div class="text-center mt-3 mb-3 text-xl font-semibold">
+            Xác thực mã OTP
+            <div class="text-center mt-1 text-xs font-light">Mã OTP hết hạn? <span class="hover:text-primary cursor-pointer" (click)="resentOtpCode()">Gửi lại</span></div>
+          </div>
+          <p-inputOtp [(ngModel)]="otp.otpCodeValue" [length]="5" [integerOnly]="true" [disabled]="disableOtpInput" autofocus=""/>
+          <!-- <span class="text-center text-xs font-light">Bạn còn n lần thử</span> -->
+        </div>
+        <div class="flex pt-4 justify-content-between">
+          <p-button
+            (onClick)="prevCallback.emit()"
+            label="Quay lại"
+            severity="secondary"
+            icon="pi pi-arrow-left"
+            size="small"
+          />
+          <p-button
+            (onClick)="otpAuthenticationHandler(nextCallback)"
+            label="Tiếp tục"
+            icon="pi pi-arrow-right"
+            iconPos="right"
+            [disabled]="otp.otpCodeValue.length !== 5"
+            size="small"
+            [loading]="loading"
+          />
+        </div>
+      </ng-template>
+      <!-- END STEP 02 -->
+    </p-stepperPanel>
+    <p-stepperPanel>
+      <!-- BEGIN STEP 03 -->
+      <ng-template pTemplate="header" let-onClick="onClick" let-index="index">
+        <button
+          class="bg-transparent border-none inline-flex flex-column gap-2"
+          (onClick)="onClick.emit()"
+        >
+          <span
+            class="border-round border-2 w-3rem h-3rem inline-flex align-items-center justify-content-center"
+            [ngClass]="{
+              'bg-primary border-primary': index <= resetPasswordModel.active,
+              'surface-border': index > resetPasswordModel.active
+            }"
+          >
+            <i class="pi pi-id-card"></i>
+          </span>
+        </button>
+      </ng-template>
+      <ng-template pTemplate="content">
+        <div
+          class="flex flex-column gap-2 mx-auto"
+          style="min-height: 10rem; max-width: 20rem"
+        >
+          <div class="text-center mt-3 mb-3 text-xl font-semibold">
+            Nhập mật khẩu mới
+          </div>
+          <form [formGroup]="updatePasswordFormGroup">
+            <div class="field p-fluid">
+              <p-password formControlName="password" [toggleMask]="true" [feedback]="false" placeholder="Mật khẩu mới" autofocus=""
+              [ngClass]="{'enable-validation' : updatePasswordValidator.isEmptyPassword}"
+              (click)="updatePasswordValidator.isEmptyPassword = false"
+              />
+              <div class="error-container mt-1">
+                <ng-container *ngFor="let validation of validations.password">
+                  <div
+                    class="error-message text-sm"
+                    *ngIf="
+                      updatePasswordFormGroup.get('password')?.hasError(validation.type) &&
+                      (updatePasswordFormGroup.get('password')?.dirty ||
+                      updatePasswordFormGroup.get('password')?.touched)
+                      && updatePasswordValidator.isEmptyPassword"
+                  >
+                    <i class="pi pi-info-circle mr-1"></i>
+                    <span>{{ validation.message }}</span>
+                  </div>
+                </ng-container>
+              </div>
+            </div>
+          </form>
+        </div>
+        <div class="flex pt-1 justify-content-end">
+          <p-button
+            (onClick)="updatePasswordHandler()"
+            label="Xác nhận"
+            size="small"
+            [loading]="loading"
+          />
+        </div>
+      </ng-template>
+      <!-- END STEP 03 -->
+    </p-stepperPanel>
+  </p-stepper>
+
+  <!-- <div class="flex justify-content-end gap-2">
+      <p-button label="Cancel" severity="secondary" (click)="hideResetPasswordModel()" />
+      <p-button label="Save" (click)="hideResetPasswordModel()" />
+  </div> -->
+</p-dialog >
+<p-toast styleClass="text-sm" />

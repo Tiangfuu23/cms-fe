@@ -1,0 +1,46 @@
+:host ::ng-deep {
+  .p-inputtext:enabled:focus, .p-button:focus{
+    box-shadow: none;
+  }
+  .p-inputtext.ng-dirty.ng-invalid, p-password.ng-invalid.ng-dirty > .p-password > .p-inputtext {
+    border-color: #3B82F6;
+  }
+  .p-inputtext.ng-dirty.ng-invalid.enable-validation, p-password.ng-invalid.ng-dirty.enable-validation > .p-password > .p-inputtext{
+    border-color: #e24c4c
+  }
+  .p-inputotp {
+    justify-content: center;
+  }
+  .p-toast-message-icon {
+    transform: scale(0.8);
+  }
+}
+:host {
+  .card {
+    ::ng-deep{
+      .p-card-title, .p-card-subtitle, .p-card-footer{
+        text-align: center;
+      }
+      .p-card-subtitle{
+        font-size: 14px;
+      }
+    }
+    label {
+      display: block;
+    }
+    .forgot-password {
+      color: var(--red-400);
+      cursor: pointer;
+    }
+    .forgot-password:hover {
+      color: var(--red-300);
+    }
+
+  }
+  .error-container {
+    color: var(--red-400);
+    i {
+      font-size: inherit;
+    }
+  }
+}
