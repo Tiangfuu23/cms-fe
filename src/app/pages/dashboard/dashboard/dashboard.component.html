@@ -1,0 +1,76 @@
+<div class="w-full h-full grid grid-nogutter">
+  <div class="col-2">
+    <app-nav-menu></app-nav-menu>
+  </div>
+  <div class="col-10 surface-ground">
+    <div class="w-full h-full flex justify-content-center align-items-center"  *ngIf="loading">
+      <p-progressSpinner
+        styleClass="w-4rem h-4rem"
+        strokeWidth="8"
+        fill="var(--surface-ground)"
+      />
+    </div>
+    <div class="px-4 py-5 md:px-6 lg:px-8" *ngIf="!loading">
+      <div class="grid">
+          <!-- CARD 1 -->
+          <div class="col-12 md:col-6 lg:col-3">
+              <div class="surface-card shadow-2 p-3 border-round border-card-1">
+                <div class="flex gap-2 card-header">
+                  <div class="flex align-items-center justify-content-center bg-blue-100 border-round mb-3" style="width:1.5rem;height:1.5rem">
+                    <i class="pi pi-objects-column text-blue-500 text-sm"></i>
+                  </div>
+                  <span class="text-500 font-medium font-sm">Category</span>
+                </div>
+                <div class="flex align-items-center justify-content-center">
+                    <span class="text-900 font-medium text-2xl">{{dashboardInfo.categoryCnt}}</span>
+                </div>
+              </div>
+          </div>
+          <!-- CARD 2 -->
+          <div class="col-12 md:col-6 lg:col-3">
+              <div class="surface-card shadow-2 p-3 border-round border-card-2">
+                <div class="flex gap-2 card-header">
+                  <div class="flex align-items-center justify-content-center bg-orange-100 border-round mb-3" style="width:1.5rem;height:1.5rem">
+                    <i class="pi pi-box text-orange-500 text-sm"></i>
+                  </div>
+                  <span class="text-500 font-medium font-sm">Product</span>
+                </div>
+                <div class="flex align-items-center justify-content-center">
+                    <span class="text-900 font-medium text-2xl">{{dashboardInfo.productCnt}}</span>
+                </div>
+              </div>
+          </div>
+          <!-- CARD 3 -->
+          <div class="col-12 md:col-6 lg:col-3">
+              <div class="surface-card shadow-2 p-3 border-round border-card-3">
+                <div class="flex gap-2 card-header">
+                  <div class="flex align-items-center justify-content-center bg-cyan-100 border-round mb-3" style="width:1.5rem;height:1.5rem">
+                    <i class="pi pi-dollar text-cyan-500 text-sm"></i>
+                  </div>
+                  <span class="text-500 font-medium font-sm">Revenue</span>
+                </div>
+                <div class="flex align-items-center justify-content-center">
+                    <span class="text-900 font-medium text-2xl">${{dashboardInfo.revenue}}</span>
+                </div>
+              </div>
+          </div>
+          <!-- CARD 4 -->
+          <div class="col-12 md:col-6 lg:col-3">
+              <div class="surface-card shadow-2 p-3 border-round border-card-4">
+                <div class="flex gap-2 card-header user">
+                  <div class="flex align-items-center justify-content-center bg-purple-100 border-round mb-3" style="width:1.5rem;height:1.5rem">
+                    <i class="pi pi-user text-purple-500 text-sm">
+                      <p-badge [value]="mapUserId2UserModel.size" styleClass="user-badge" severity="success" />
+                    </i>
+                  </div>
+                  <span class="text-500 font-medium font-sm">User</span>
+                </div>
+                <div class="flex align-items-center justify-content-center">
+                    <span class="text-900 font-medium text-2xl">{{dashboardInfo.userCnt}}</span>
+                </div>
+              </div>
+          </div>
+      </div>
+    </div>
+  </div>
+</div>

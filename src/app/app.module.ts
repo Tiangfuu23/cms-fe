@@ -27,11 +27,34 @@ import { StepperModule } from 'primeng/stepper';
 import { InputOtpModule } from 'primeng/inputotp';
 import { ToastModule } from 'primeng/toast';
 import { MessageService } from 'primeng/api';
+import { NavMenuComponent } from './shared/components/nav-menu/nav-menu.component';
+import { DashboardComponent } from './pages/dashboard/dashboard/dashboard.component';
+import { MenuModule } from 'primeng/menu';
+import { AvatarModule } from 'primeng/avatar';
+import { AvatarGroupModule } from 'primeng/avatargroup';
+import { ProgressSpinnerModule } from 'primeng/progressspinner';
+import { BadgeModule } from 'primeng/badge';
+import { CategoryComponent } from './pages/category/category.component';
+import { TableModule } from 'primeng/table';
+import { ConfirmDialogModule } from 'primeng/confirmdialog';
+import { ConfirmationService } from 'primeng/api';
+import { ProductComponent } from './pages/product/product.component';
+import { TagModule } from 'primeng/tag';
+import { DropdownModule } from 'primeng/dropdown';
+import { InputNumberModule } from 'primeng/inputnumber';
+import { InputSwitchModule } from 'primeng/inputswitch';
+import { BillComponent } from './pages/bill/bill.component';
+
 @NgModule({
   declarations: [
     AppComponent,
     LoginComponent,
     PageNotFoundComponent,
+    NavMenuComponent,
+    DashboardComponent,
+    CategoryComponent,
+    ProductComponent,
+    BillComponent,
   ],
   imports: [
     BrowserModule,
@@ -54,7 +77,18 @@ import { MessageService } from 'primeng/api';
     BrowserAnimationsModule,
     StepperModule,
     InputOtpModule,
-    ToastModule
+    ToastModule,
+    MenuModule,
+    AvatarModule,
+    AvatarGroupModule,
+    ProgressSpinnerModule,
+    BadgeModule,
+    TableModule,
+    ConfirmDialogModule,
+    TagModule,
+    DropdownModule,
+    InputNumberModule,
+    InputSwitchModule
   ],
   providers: [
     {
@@ -62,7 +96,8 @@ import { MessageService } from 'primeng/api';
       useClass: customHttpInterceptor,
       multi: true,
     },
-    MessageService
+    MessageService,
+    ConfirmationService
   ],
   bootstrap: [AppComponent]
 })

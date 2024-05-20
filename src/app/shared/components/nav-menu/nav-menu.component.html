@@ -1,0 +1,30 @@
+<p-menu [model]="items" styleClass="h-full w-full border-noround">
+  <ng-template pTemplate="start">
+      <span class="flex align-items-center gap-1 px-2 py-2">
+          <img src="assets/icons/favicon.ico" alt="logo-coffe" class="logo">
+          <span class="font-medium text-xl font-semibold">
+              TAT <span class="" style="color: #AF8E72">Coffee.</span>
+          </span>
+      </span>
+      <div class="profile-container flex flex-column align-items-center py-2">
+        <p-avatar
+          image="https://primefaces.org/cdn/primeng/images/demo/avatar/amyelsner.png"
+          size="xlarge"
+          shape="circle"
+        />
+        <span class="inline-flex flex-column text-center">
+          <span class="font-bold mt-2">{{userInfo.fullname}}</span>
+          <span class="text-sm mt-1">{{ROLES[userInfo.roleId]}}</span>
+      </span>
+      </div>
+  </ng-template>
+  <ng-template pTemplate="submenuheader" let-item>
+      <span class="text-primary font-bold">{{ item.label }}</span>
+  </ng-template>
+  <ng-template pTemplate="item" let-item>
+      <a pRipple class="flex align-items-center p-menuitem-link" [routerLink]="item.routerLink" routerLinkActive="active-link">
+          <span [class]="item.icon"></span>
+          <span class="ml-2">{{ item.label }}</span>
+      </a>
+  </ng-template>
+</p-menu>

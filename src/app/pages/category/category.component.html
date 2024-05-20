@@ -1,0 +1,60 @@
+<div class="w-full h-full grid grid-nogutter">
+  <div class="col-2">
+    <app-nav-menu></app-nav-menu>
+  </div>
+  <div class="col-10 surface-ground flex align-items-center justify-content-center">
+    <div class="w-full h-full flex justify-content-center align-items-center"  *ngIf="loading">
+      <p-progressSpinner
+        styleClass="w-4rem h-4rem"
+        strokeWidth="8"
+        fill="var(--surface-ground)"
+      />
+    </div>
+    <div class="card p-4 shadow-1 w-full" style="height: 90%" *ngIf="!loading">
+      <p-table [value]="categories" [rowHover]="true" [scrollable]="true"
+      scrollHeight="400px">
+        <ng-template pTemplate="caption">
+            <div class="flex align-items-center justify-content-between">
+                Categories
+                <p-button icon="pi pi-plus
+                " (onClick)="showCreateCateDialog()" />
+            </div>
+        </ng-template>
+        <ng-template pTemplate="header">
+            <tr>
+                <th>Name</th>
+                <th style="width: 20%">Action</th>
+            </tr>
+        </ng-template>
+        <ng-template pTemplate="body" let-category>
+            <tr>
+                <td>{{category.categoryName}}</td>
+                <td>
+                  <p-button icon="pi pi-pen-to-square" size="small"
+                  [outlined]="true"
+                  (onClick)="showEditCateDialog(category)"
+                  />
+                  <p-button icon="pi pi-times" severity="danger" size="small"
+                  [outlined]="true"
+                  (onClick)="confirmDeleteCate($event, category)"
+                  />
+                </td>
+            </tr>
+        </ng-template>
+    </p-table>
+    </div>
+  </div>
+</div>
+<p-dialog [header]="dialog.header" [modal]="true" [(visible)]="dialog.isVisibleDialog" [style]="{ width: '25rem' }">
+  <div class="flex flex-column gap-2 mb-3">
+      <label for="username">Category Name</label>
+      <input pInputText id="username" class="flex-auto" autocomplete="off"
+      [(ngModel)]="dialog.categoryName" autofocus/>
+  </div>
+  <div class="flex justify-content-end gap-2">
+      <p-button label="Cancel" severity="secondary" (click)="hideCateDialog()" />
+      <p-button label="Save" (click)="handleSaveCateDialog()" />
+  </div>
+</p-dialog>
+<p-toast styleClass="text-sm" />
+<p-confirmDialog />

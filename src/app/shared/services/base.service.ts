@@ -9,7 +9,7 @@ import { ConfigStateService } from '../app-state/config-state.service';
   providedIn: 'root'
 })
 export class BaseService {
-  protected baseUrl = '';
+  private baseUrl = '';
 
   constructor(
     private configState: ConfigStateService,
@@ -17,7 +17,7 @@ export class BaseService {
   ) {
     this.configState.subscribe( (data: IAppConfig) => {
       this.baseUrl = data.beUrl
-      console.log(`base url ${this.baseUrl}`)
+      // console.log(`base url ${this.baseUrl}`)
     });
   }
 
@@ -85,7 +85,7 @@ export class BaseService {
     }
   }
 
-  protected delete(url: string, id: any, responseType?: string): Observable<any> {
+  protected delete(url: string, responseType?: string): Observable<any> {
     switch (responseType) {
       case 'text':
         return this.httpClient.delete(this.baseUrl + url, {

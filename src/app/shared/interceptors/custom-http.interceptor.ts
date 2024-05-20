@@ -17,13 +17,13 @@ export class customHttpInterceptor implements HttpInterceptor {
     const isApiUrl : boolean = req.url.includes(this.baseUrl);
     return next.handle(req).pipe(
       map((res: HttpEvent<any>) => {
-        console.log("Hello from interceptor!");
+        // console.log("Hello from interceptor!");
         return res;
       }),
       catchError((error : HttpErrorResponse) => {
-        console.log("Error response from interceptor");
+        console.log("Error response from interceptor", error);
         if (isApiUrl && error.status == 403 || error.status == 401) {
-          this.router.navigate(['']);
+          this.router.navigate(['login']);
         }
         return throwError(() => error);
       }));

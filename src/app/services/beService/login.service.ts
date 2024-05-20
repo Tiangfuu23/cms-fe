@@ -17,5 +17,10 @@ export class LoginService extends BaseService {
   doLogin(account : any){
     localStorage.setItem(StorageKeys.TOKEN, account.token);
     localStorage.setItem(StorageKeys.USER_INFO, JSON.stringify(account.user));
+
+  }
+
+  validateToken(payload: any) : Observable<any> {
+    return this.post(`${this.url}/validate`, payload);
   }
 }

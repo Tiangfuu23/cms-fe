@@ -1,11 +1,15 @@
-import { Component } from '@angular/core';
+import { Component, OnInit, OnDestroy } from '@angular/core';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
-import { OnInit } from '@angular/core';
 import { LoginService } from '../../services/beService/login.service';
 import { ForgetPasswordService } from '../../services/beService/forget-password.service';
 import { ToastService } from '../../services/featService/toast.service';
 import { StorageKeys } from '../../shared/constants/Constants.class';
 import { UserService } from '../../services/beService/user.service';
+import { Router } from '@angular/router';
+import { AuthStateService } from '../../shared/app-state/auth-state.service';
+import { SupabaseService } from '../../services/beService/supabase.service';
+import { Subscription } from 'rxjs';
+
 interface OTP {
   otpCodeId : number,
   otpCodeValue : string
@@ -16,7 +20,7 @@ interface OTP {
   templateUrl: './login.component.html',
   styleUrl: './login.component.scss'
 })
-export class LoginComponent implements OnInit {
+export class LoginComponent implements OnInit, OnDestroy {
   loginFormGroup !: FormGroup;
   forgetPasswordFormGroup !: FormGroup;
   updatePasswordFormGroup !: FormGroup;
@@ -61,18 +65,38 @@ export class LoginComponent implements OnInit {
     active: 0,
   }
   userIdForUpdatePassword: number = -1;
+  // subscription
+  loginSub !: Subscription
+  forgetPasswrdSub !: Subscription
+  authCodeSub !: Subscription
+  updatePasswrdSub !: Subscription
   constructor(
     private formBuilder : FormBuilder,
     private loginService : LoginService,
     private forgetPassword : ForgetPasswordService,
     private toastService : ToastService,
-    private userService : UserService
+    private userService : UserService,
+    private router : Router,
+    private authStateService: AuthStateService,
+    private supabaseService: SupabaseService
   ) {
+
+  }
+  ngOnInit(): void {
+    localStorage.clear();
     this.initializeLoginForm();
     this.initializeForgetPasswordForm();
     this.initializeUpdatePasswordForm();
+    this.supabaseService.unsubscribeTrackingChannel();
   }
-  ngOnInit(): void {}
+
+  ngOnDestroy(): void {
+    console.log("Login destroy");
+    this.loginSub?.unsubscribe();
+    this.forgetPasswrdSub?.unsubscribe();
+    this.updatePasswrdSub?.unsubscribe();
+    this.authCodeSub?.unsubscribe();
+  }
 
   initializeLoginForm() {
     this.loginFormGroup = this.formBuilder.group({
@@ -107,19 +131,27 @@ export class LoginComponent implements OnInit {
       username : loginForm.username,
       password : loginForm.password
     }
-    this.loginService.login(payload).subscribe({
+    this.loginSub = this.loginService.login(payload).subscribe({
       next: (res) => {
         console.log('login successfully', res);
         this.loginService.doLogin(res);
+        this.authStateService.dispatch({
+          id: res.user.id,
+          username: res.user.username,
+          fullname: res.user.fullname,
+          roleId: res.user.role.roleId
+        })
         this.loading = false;
-        
+        this.router.navigate(['dashboard']);
       },
       error: (err) => {
         console.log(err);
         if(err.error.Message == 'Tên đăng nhập không chính xác! Vui lòng kiểm tra lại.'){
           this.setLoginValidator(false, false, true, false, "Tên đăng nhập không chính xác!");
-        }else{
+        }else if(err.error.Message == 'Mật khẩu không chính xác! Vui lòng kiểm tra lại.'){
           this.setLoginValidator(false, false, false, true, "Mật khẩu không chính xác!");
+        }else{
+          this.toastService.showError("Lỗi kết nối tới server");
         }
         this.loading = false;
       }
@@ -182,7 +214,7 @@ export class LoginComponent implements OnInit {
       username: forgetPasswordForm.username,
       email: forgetPasswordForm.email
     }
-    this.forgetPassword.forgetPassword(payload).subscribe({
+    this.forgetPasswrdSub = this.forgetPassword.forgetPassword(payload).subscribe({
       next: (res) => {
         console.log("Response from forgetpassword", res);
         this.otp.otpCodeId = res.otpCodeId;
@@ -223,7 +255,8 @@ export class LoginComponent implements OnInit {
       username: forgetPasswordForm.username,
       email: forgetPasswordForm.email
     }
-    this.forgetPassword.forgetPassword(payload).subscribe({
+    this.forgetPasswrdSub.unsubscribe();
+    this.forgetPasswrdSub = this.forgetPassword.forgetPassword(payload).subscribe({
       next: (res) => {
         this.toastService.showSucces("Gửi lại mã OTP mới thành công! Vui lòng kiểm tra email đăng ký!")
         console.log("Response from forgetpassword", res);
@@ -246,7 +279,7 @@ export class LoginComponent implements OnInit {
       "otpCodeId": this.otp.otpCodeId,
       "code": this.otp.otpCodeValue
     }
-    this.forgetPassword.authenticateOtpCode(payload).subscribe({
+    this.authCodeSub = this.forgetPassword.authenticateOtpCode(payload).subscribe({
       next: (res) => {
         this.toastService.showSucces("Xác thực thành công!");
         this.userIdForUpdatePassword = res.userId;
@@ -277,7 +310,7 @@ export class LoginComponent implements OnInit {
       newPassword: updatePasswordForm.password
     }
 
-    this.userService.UpdatePassword(payload).subscribe({
+    this.updatePasswrdSub = this.userService.UpdatePassword(payload).subscribe({
       next: (res) => {
         this.toastService.showSucces("Cập nhật mật khẩu thành công!");
         this.loading = false
