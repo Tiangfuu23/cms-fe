@@ -24,15 +24,16 @@ export class DashboardComponent implements OnInit {
     private toastService : ToastService,
     private onlineUserService : OnlineUserService
   ){
+  }
+
+  ngOnInit(): void {
     this.userInfo = JSON.parse(localStorage.getItem(StorageKeys.USER_INFO)!)
     this.onlineUserService.subscribe((map)=> {
       console.log("New value from onlineuser observable", map);
       this.mapUserId2UserModel = map;
       // this.mapUserId2UserModel.delete(this.userInfo.id);
     })
-  }
 
-  ngOnInit(): void {
     this.initDashboardInfo();
 
   }

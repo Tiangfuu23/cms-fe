@@ -145,7 +145,7 @@
           styleClass="flex-grow-1"
           placeholder="Enter product price"
           formControlName="price"
-          inputId="locale-us"
+          inputId="price"
           mode="currency"
           locale="en-US"
           currency="USD"
@@ -156,8 +156,6 @@
         <label for="active" class="font-semibold w-6rem">Active:</label>
         <p-inputSwitch id="active" formControlName="active" />
       </div>
-
-
     </form>
     <div class="flex justify-content-end gap-2">
         <p-button label="Cancel" severity="secondary" (click)="hideProductFrm()" />

@@ -13,9 +13,10 @@ export class Constant {
   'LOWSTOCK': 3,
   }
 
-  public static readonly USER_STATUS = {
-    1: 'Online',
-    2: 'Offline'
+  public static readonly PAYMENT_METHOD = {
+    'Cash' : 1,
+    'Bank' : 2,
+    'Creadit card': 3
   }
 }
 

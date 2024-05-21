@@ -1,1 +1,251 @@
-<p>bill works!</p>
+<div class="w-full h-full grid grid-nogutter">
+  <div class="col-2">
+    <app-nav-menu></app-nav-menu>
+  </div>
+  <div class="col-10 surface-ground flex align-items-center justify-content-center">
+    <div class="w-full h-full flex justify-content-center align-items-center"  *ngIf="loading">
+      <p-progressSpinner
+        styleClass="w-4rem h-4rem"
+        strokeWidth="8"
+        fill="var(--surface-ground)"
+      />
+  </div>
+    <div class="card p-4 shadow-1 w-full" style="height: 90%" *ngIf="!loading">
+      <p-table [value]="bills" dataKey="id"
+               [scrollable]="true"
+               scrollHeight="400px">
+        <ng-template pTemplate="caption">
+            <div class="flex align-items-center justify-content-between">
+                Bills
+                <p-button icon="pi pi-plus
+                " (onClick)="showCreateBillDialog()" />
+            </div>
+        </ng-template>
+        <ng-template pTemplate="header">
+            <tr>
+                <th style="width: 5rem"></th>
+                <th>Id</th>
+                <th>Payment method</th>
+                <th>Creator</th>
+                <th>Date</th>
+                <th>Total price</th>
+                <th>Action</th>
+            </tr>
+        </ng-template>
+        <ng-template pTemplate="body" let-bill let-expanded="expanded">
+            <tr>
+                <td>
+                    <p-button type="button" [pRowToggler]="bill" [text]="true" [rounded]="true" [plain]="true" [icon]="expanded ? 'pi pi-chevron-down' : 'pi pi-chevron-right'" />
+                </td>
+                <td>{{ bill.id }}</td>
+                <td>{{ bill.paymentMethod.description }}</td>
+                <td>{{ bill.user.fullname }}</td>
+                <td>{{ bill.creationDate | date : 'dd/MM/yyyy HH:mm:ss' }}</td>
+                <td>{{ bill.totalPrice | currency : 'USD' }}</td>
+                <td>
+                  <p-button icon="pi pi-file-pdf" size="small"
+                  [outlined]="true"
+                  (onClick)="viewPdfBill(bill)"/>
+                  <p-button icon="pi pi-times" severity="danger" size="small"
+                  [outlined]="true"
+                  (onClick)="confirmDeleteBill($event, bill)"
+                  />
+                </td>
+            </tr>
+        </ng-template>
+        <ng-template pTemplate="rowexpansion" let-bill>
+            <tr>
+                <td colspan="7">
+                    <div class="p-3">
+                        <p-table [value]="bill.productDetails" dataKey="id" [rowHover]="true">
+                            <ng-template pTemplate="caption">
+                              <div class="flex align-items-center justify-content-between">
+                                  Bill details
+                              </div>
+                            </ng-template>
+                            <ng-template pTemplate="header">
+                                <tr>
+                                    <th>Id</th>
+                                    <th>Product name</th>
+                                    <th>Category</th>
+                                    <th>Price</th>
+                                    <th>Quantity</th>
+                                    <th>Subtotal</th>
+                                </tr>
+                            </ng-template>
+                            <ng-template pTemplate="body" let-product>
+                                <tr>
+                                    <td>{{ product.id }}</td>
+                                    <td>{{ product.productName }}</td>
+                                    <td>{{ product.categoryName }}</td>
+                                    <td>{{ product.price | currency : 'USD' }}</td>
+                                    <td>{{ product.quantity }}</td>
+                                    <td>{{  product.totalSubPrice | currency : 'USD' }}</td>
+                                </tr>
+                            </ng-template>
+                        </p-table>
+                    </div>
+                </td>
+            </tr>
+        </ng-template>
+    </p-table>
+    </div>
+  </div>
+</div>
+
+<p-toast styleClass="text-sm" />
+<p-confirmDialog />
+
+<p-dialog
+    header="Create a bill"
+    [modal]="true"
+    [(visible)]="dialog.isVisible"
+    [style]="{ width: '50rem'}"
+    [breakpoints]="{ '1199px': '75vw', '575px': '90vw' }">
+    <div class="dialog-content-container h-full w-full flex flex-column justify-content-between">
+      <div class="bill-container mb-5">
+        <div class="select-payment-method mb-3">
+          <div class="header font-semibold mb-2 text-lg">Select a payment method</div>
+          <div class="body grid">
+            <div class="flex flex-column gap-1 col-4">
+              <label for="payment_method">Payment method</label>
+              <p-dropdown
+                  id="payment_method"
+                  styleClass="w-full"
+                  scrollHeight="120px"
+                  [(ngModel)]="dialog.selectedPaymentMethod"
+                  [options]="paymentMethods"
+                  optionLabel="description"
+                  [filter]="true"
+                  filterBy="description"
+                  placeholder="Select a payment method"/>
+            </div>
+          </div>
+        </div>
+        <div class="seletct-product mb-3">
+          <div class="header font-semibold mb-2 text-lg">Select a product</div>
+          <div class="body grid">
+            <div class="category flex flex-column gap-1 col-4">
+              <label for="category">Category</label>
+              <p-dropdown
+                  id="category"
+                  styleClass="w-full"
+                  scrollHeight="120px"
+                  [(ngModel)]="dialog.selectedCategory"
+                  [options]="dialog.categoryList"
+                  optionLabel="categoryName"
+                  [filter]="true"
+                  filterBy="categoryName"
+                  placeholder="Select a category"
+                  (onChange)="handleCateDropdownChange()"/>
+            </div>
+            <div class="product flex flex-column gap-1 col-4">
+              <label for="product">Product</label>
+              <p-dropdown
+                [disabled]="this.dialog.selectedCategory === null"
+                id="product"
+                scrollHeight="120px"
+                styleClass="w-full"
+                [(ngModel)]="dialog.selectedProduct"
+                [options]="dialog.filtedProductList"
+                optionLabel="productName"
+                [filter]="true"
+                filterBy="productName"
+                placeholder="Select a product"
+                (onChange)="handleProductDropdownChange()"/>
+            </div>
+            <div class="quantity flex flex-column gap-1 flex-1 col-4">
+              <label for="quantity">Quantity</label>
+              <p-inputNumber
+                [disabled]="!dialog.selectedCategory || !dialog.selectedProduct"
+                inputId="quantity"
+                styleClass="flex-grow-1"
+                [(ngModel)]="dialog.quantity" />
+            </div>
+            <div class="price flex flex-column gap-1 col-4">
+              <label for="price">Price</label>
+              <p-inputNumber
+                [disabled]="true"
+                styleClass="flex-grow-1"
+                inputId="price"
+                mode="currency"
+                locale="en-US"
+                currency="USD"
+                [ngModel]="dialog.price"
+                [minFractionDigits]="0"
+                [maxFractionDigits]="2" />
+            </div>
+            <div class="sub-total flex flex-column gap-1 col-4">
+              <label for="subtotal">Subtotal</label>
+              <p-inputNumber
+                [disabled]="true"
+                styleClass="flex-grow-1"
+                inputId="subtotal"
+                mode="currency"
+                locale="en-US"
+                currency="USD"
+                [ngModel]="(dialog.price && dialog.quantity ? dialog.price * dialog.quantity : null)"
+                [minFractionDigits]="0"
+                [maxFractionDigits]="2" />
+            </div>
+            <div class="col-4 flex align-items-end">
+              <button
+                size="small"
+                pButton
+                pRipple
+                label="Add"
+                (click)="handleAddProduct2Bill()">
+              </button>
+            </div>
+          </div>
+        </div>
+        <div class="bill-details">
+          <p-table [value]="dialog.productDetailsList" [style]="{'min-height': '10rem'}">
+            <ng-template pTemplate="caption">
+              <div class="flex align-items-center justify-content-between">
+                  Bill details
+              </div>
+          </ng-template>
+            <ng-template pTemplate="header">
+                <tr>
+                    <th>Id</th>
+                    <th>Name</th>
+                    <th>Category</th>
+                    <th>Price</th>
+                    <th>Quantity</th>
+                    <th>Subtotal</th>
+                    <th width="5rem"></th>
+                </tr>
+            </ng-template>
+            <ng-template pTemplate="body" let-product>
+                <tr>
+                    <td>{{ product.id }}</td>
+                    <td>{{ product.productName }}</td>
+                    <td>{{ product.categoryName }}</td>
+                    <td>{{ product.price | currency:'USD' }}</td>
+                    <td>{{ product.quantity }}</td>
+                    <td>{{ product.totalSubPrice() | currency: 'USD'}}</td>
+                    <td>
+                      <p-button icon="pi pi-times" severity="danger" size="small"
+                      [outlined]="true"
+                      (onClick)="confirmRemoveProductDetail($event, product)"
+                      />
+                    </td>
+                </tr>
+            </ng-template>
+            <ng-template pTemplate="footer">
+              <tr>
+                <td style="background-color: #fff;" colspan="6" class="font-bold text-right">Total price: {{dialog.total | currency: 'USD'}}
+                </td>
+              </tr>
+            </ng-template>
+          </p-table>
+        </div>
+
+      </div>
+      <div class="flex justify-content-end gap-2">
+          <p-button label="Cancel" severity="secondary" (click)="hideBillDialog()" size="small" />
+          <p-button label="Save" (click)="handleSaveBillDialog()" size="small" />
+      </div>
+    </div>
+</p-dialog>
