@@ -22,6 +22,7 @@ export class AuthStateService {
     return this.subject.asObservable();
   }
   public dispatch(payload: any | null): void {
+    // console.log('dispatched data', payload);
     const data: Partial<IAuthModel> = payload as Partial<IAuthModel>;
     this.authData = {...this.authData, ...data};
 

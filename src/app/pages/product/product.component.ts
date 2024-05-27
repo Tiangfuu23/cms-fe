@@ -6,6 +6,7 @@ import { ConfirmationService } from 'primeng/api';
 import { ProductService } from '../../services/beService/product.service';
 import { FormGroup, FormBuilder, Validators } from '@angular/forms';
 import { CategoryService } from '../../services/beService/category.service';
+import { SupabaseService } from '../../services/beService/supabase.service';
 @Component({
   selector: 'app-product',
   templateUrl: './product.component.html',
@@ -57,7 +58,8 @@ export class ProductComponent implements OnInit, OnDestroy {
     private toastService : ToastService,
     private confirmationService : ConfirmationService,
     private formBuilder : FormBuilder,
-    private categoryService : CategoryService
+    private categoryService : CategoryService,
+    private supabaseService : SupabaseService
   ){
 
   }
@@ -79,7 +81,7 @@ export class ProductComponent implements OnInit, OnDestroy {
     this.categorySub?.unsubscribe();
     this.categorySub = this.categoryService.getCategories().subscribe({
       next: (res : any) => {
-        console.log(res);
+        // console.log(res);
         this.categories = res;
       },
       error: (error : any) => {
@@ -94,7 +96,7 @@ export class ProductComponent implements OnInit, OnDestroy {
     this.productSub?.unsubscribe();
     this.productSub = this.productService.getProducts().subscribe({
       next : (res) => {
-        console.log(res);
+        // console.log(res);
         this.products = res;
         this.mapCateogryId2ProductCnt.clear();
         this.products.forEach(p => {
@@ -133,7 +135,7 @@ export class ProductComponent implements OnInit, OnDestroy {
   }
 
   showEditCateDialog(product : any){
-    console.log(product)
+    // console.log(product)
     this.dialog = {
       isVisibleDialog: true,
       header: "Edit category",
@@ -181,13 +183,13 @@ export class ProductComponent implements OnInit, OnDestroy {
       categoryId: frmValue.category.id,
       active: frmValue.active
     }
-    console.log('payload from create product', payload);
+    // console.log('payload from create product', payload);
 
     if(this.dialog.isEditDialog){
       payload.id = this.dialog.selectedProduct?.id!;
       this.productService.updateProduct(payload.id!, payload).subscribe({
         next: (res) => {
-          console.log(res);
+          // console.log(res);
           this.toastService.showSucces("Cập nhật thành công!");
           this.initProducts();
           this.hideProductFrm();
@@ -199,11 +201,16 @@ export class ProductComponent implements OnInit, OnDestroy {
       })
     }else if(this.dialog.isCreateDialog){
       this.productService.createProduct(payload).subscribe({
-        next: (res) => {
+        next: async (res) => {
           console.log(res);
-          this.toastService.showSucces("Thêm mới thành công!");
+          const newlyCreatedProductId = res.id;
+          await this.supabaseService.insertProduct({
+            id: newlyCreatedProductId,
+            ...payload
+          })
           this.initProducts();
           this.hideProductFrm();
+          this.toastService.showSucces("Thêm mới thành công!");
         },
         error: (error) => {
           console.log(error);
@@ -214,7 +221,7 @@ export class ProductComponent implements OnInit, OnDestroy {
   }
 
   confirmDeleteProduct(event : any, product : any){
-    console.log("Product for delete", product);
+    // console.log("Product for delete", product);
     this.confirmationService.confirm({
       target: event.target as EventTarget,
       message: 'Do you want to delete this product?',
@@ -228,7 +235,7 @@ export class ProductComponent implements OnInit, OnDestroy {
       accept: () => {
         this.productService.deleteProduct(product.id).subscribe({
           next: (res) => {
-            console.log('res from delete product', res);
+            // console.log('res from delete product', res);
             this.toastService.showSucces("Xóa product thành công!");
             this.initProducts();
           },
@@ -273,7 +280,7 @@ export class ProductComponent implements OnInit, OnDestroy {
 
   validateProductFrm() : boolean {
     const frmValue = this.productFrm.value;
-    console.log(frmValue);
+    // console.log(frmValue);
     if(frmValue.productName.trim() === ""){
       this.toastService.showError("Tên sản phẩm không thể để trống!");
       return false;

@@ -139,7 +139,10 @@ export class LoginComponent implements OnInit, OnDestroy {
           id: res.user.id,
           username: res.user.username,
           fullname: res.user.fullname,
-          roleId: res.user.role.roleId
+          roleId: res.user.role.roleId,
+          email: res.user.email,
+          gender: res.user.gender,
+          birthday: new Date(res.user.birthday)
         })
         this.loading = false;
         this.router.navigate(['dashboard']);
@@ -310,7 +313,7 @@ export class LoginComponent implements OnInit, OnDestroy {
       newPassword: updatePasswordForm.password
     }
 
-    this.updatePasswrdSub = this.userService.UpdatePassword(payload).subscribe({
+    this.updatePasswrdSub = this.userService.updatePassword(payload).subscribe({
       next: (res) => {
         this.toastService.showSucces("Cập nhật mật khẩu thành công!");
         this.loading = false

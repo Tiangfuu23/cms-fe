@@ -6,6 +6,8 @@ import { ToastService } from '../../services/featService/toast.service';
 import { Subscription } from 'rxjs';
 import { ConfirmationService } from 'primeng/api';
 import { Constant, StorageKeys } from '../../shared/constants/Constants.class';
+import { SupabaseService } from '../../services/beService/supabase.service';
+
 interface IProductDetails  {
   id : number,
   productName: string,
@@ -57,12 +59,16 @@ export class BillComponent implements OnInit, OnDestroy {
   cateSub !: Subscription;
   productSub !: Subscription;
 
+  // testing
+  // testDate : Date = new Date();
+
   constructor(
     private billService : BillService,
     private categoryService: CategoryService,
     private productService : ProductService,
     private toastService : ToastService,
-    private confirmationService: ConfirmationService
+    private confirmationService: ConfirmationService,
+    private supabaseService: SupabaseService
   ) {}
 
   ngOnInit(): void {
@@ -171,17 +177,28 @@ export class BillComponent implements OnInit, OnDestroy {
       return;
     }
     const payload = {
+      // creationDate: this.testDate.toISOString(), // for testing
       creationDate: new Date().toISOString(),
       userId: this.userInfo.id,
       paymentMethodId: this.dialog.selectedPaymentMethod.id,
       productDetails: this.dialog.productDetailsList
     }
 
+    let totalPrice = 0;
+    payload.productDetails.forEach(p => totalPrice += p.totalSubPrice())
+
     this.billService.createBill(payload).subscribe({
       next: (res) => {
-        this.toastService.showSucces("Thêm mới thành thành công!");
+        console.log(res);
+        const newCreatedBillId = res.id;
+        this.supabaseService.insertBill({
+          ...payload,
+          id : newCreatedBillId,
+          totalPrice
+        })
         this.initBills();
         this.hideBillDialog();
+        this.toastService.showSucces("Thêm mới thành thành công!");
       },
       error: (error) => {
         console.log(error);
@@ -280,8 +297,9 @@ export class BillComponent implements OnInit, OnDestroy {
         this.billService.deleteBill(bill.id).subscribe({
           next: (res) => {
             console.log(res);
-            this.toastService.showSucces("Xóa hóa đơn thành công!");
+            this.supabaseService.deleteBill(bill.id);
             this.initBills();
+            this.toastService.showSucces("Xóa hóa đơn thành công!");
           },
           error: (error) => {
             console.log(error);

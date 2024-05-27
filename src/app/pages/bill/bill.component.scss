@@ -12,24 +12,27 @@
     .p-button {
       transform: scale(0.8)
     }
-  }
-  .p-datatable .p-datatable-header {
-    background-color: inherit;
-    border: none;
-    padding: 0;
-    font-weight: 600;
-  }
+    .p-datatable .p-datatable-header {
+      background-color: inherit;
+      border: none;
+      padding: 0;
+      font-weight: 600;
+    }
 
-  .p-component {
-    font-size: 0.875rem;
-  }
-  .p-datatable .p-datatable-thead > tr > th {
-    padding: 1rem 1rem;
-    font-weight: 600;
-    color: #495057;
-  }
-  .dialog-content-container p-inputnumber{
-    flex-grow: 1;
+    .p-component {
+      font-size: 0.875rem;
+    }
+    .p-datatable .p-datatable-thead > tr > th {
+      padding: 1rem 1rem;
+      font-weight: 600;
+      color: #495057;
+    }
+    .dialog-content-container p-inputnumber{
+      flex-grow: 1;
+    }
   }
 }
 
+:host ::ng-deep .p-datepicker {
+  transform: scale(0.7); /* Adjust the scale to your desired value */
+}

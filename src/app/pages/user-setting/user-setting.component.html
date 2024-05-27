@@ -1,0 +1,117 @@
+<div class="w-full h-full grid grid-nogutter">
+  <div class="col-2 h-full">
+    <app-nav-menu></app-nav-menu>
+  </div>
+  <div class="col-10 surface-ground flex align-items-center justify-content-center">
+    <div class="w-full h-full flex justify-content-center align-items-center"  *ngIf="loading">
+      <p-progressSpinner
+        styleClass="w-4rem h-4rem"
+        strokeWidth="8"
+        fill="var(--surface-ground)"
+      />
+    </div>
+    <div class="card p-4 shadow-1 w-full" style="height: 90%" *ngIf="!loading">
+      <p-tabMenu [model]="items"
+      [activeItem]="activeItem"
+      (activeItemChange)="onActiveItemChange($event)"
+      />
+
+      <ng-container *ngIf="activeItem?.['key'] === MENU_KEY.Profile">
+        <span class="text-900 text-xl font-semibold mb-4 mt-2 block">User</span>
+        <form [formGroup]="userIn4Frm">
+          <div class="grid-form grid">
+            <div class="col-2 flex align-items-center">
+              <span class="text-lg font-semibold">
+                Profile
+              </span>
+            </div>
+            <div class="col-10 grid">
+              <div class="input-field flex gap-1 align-items-center col-6">
+                <label for="username" class="font-semibold w-6rem">Username:</label>
+                <input
+                  pInputText
+                  type="text"
+                  [disabled]="true"
+                  id="username"
+                  [value]="userIn4Frm.get('username')?.value"
+                  class="flex-auto"
+                  styleClass="w-full"
+                />
+              </div>
+              <div class="col-6"></div>
+              <div class="input-field flex gap-1 align-items-center col-6">
+                <label for="fullname" class="font-semibold w-6rem">Fullname:</label>
+                <input
+                  pInputText
+                  id="fullname"
+                  formControlName="fullname"
+                  class="flex-auto"
+                  styleClass="w-full"
+                />
+              </div>
+              <div class="input-field flex gap-1 align-items-center col-5 col-offset-1">
+                <label for="gmail" class="font-semibold w-6rem">Email:</label>
+                <input
+                  pInputText
+                  id="fullname"
+                  formControlName="email"
+                  type="email"
+                  class="flex-auto"
+                  styleClass="w-full"
+                />
+              </div>
+              <div class="input-field flex gap-1 align-items-center col-6">
+                <label for="gender" class="font-semibold w-6rem">Gender:</label>
+                <p-dropdown
+                  id="gender"
+                  class="flex-auto"
+                  styleClass="w-full"
+                  formControlName="gender"
+                  [options]="GENDER"/>
+              </div>
+              <div class="input-field flex gap-1 align-items-center col-5 col-offset-1">
+                <label for="birthday" class="font-semibold w-6rem">Birthday:</label>
+                <p-calendar formControlName="dob"
+                dateFormat="dd/mm/yy" />
+              </div>
+            </div>
+            <div class="save-btn mt-3 col-12 flex justify-content-center" stlye="flex-basis: 100%">
+              <p-button label="Update" (onClick)="confirmUpdateUserIn4($event)" />
+            </div>
+          </div>
+        </form>
+      </ng-container>
+
+      <ng-container *ngIf="activeItem?.['key'] === MENU_KEY.ChangePassword">
+        <div class="w-full h-full flex align-items-start justify-content-center pt-6">
+          <form [formGroup]="updatePasswordFrm">
+
+            <div class="w-full input-field flex gap-1 align-items-center col-6">
+              <label for="old_password" class="font-semibold w-10rem">Old Password:</label>
+              <p-password id="old_password" formControlName="oldPassword" [feedback]="false" />
+            </div>
+
+
+            <div class="w-full input-field flex gap-1 align-items-center col-6">
+              <label for="new_password" class="font-semibold w-10rem">Password:</label>
+              <p-password id="new_password" formControlName="newPassword" [feedback]="false" />
+            </div>
+
+            <div class="w-full input-field flex gap-1 align-items-center col-6">
+              <label for="confirm_password" class="font-semibold w-10rem">Confirm Password:</label>
+              <p-password id="confirm_password" formControlName="confirmNewPassword" [feedback]="false" />
+            </div>
+
+            <div class="save-btn mt-3 col-12 flex justify-content-center" stlye="flex-basis: 100%">
+              <p-button label="Update" (onClick)="confirmUpdateUserPassword($event)" />
+            </div>
+
+          </form>
+        </div>
+      </ng-container>
+    </div>
+  </div>
+</div>
+
+<p-toast styleClass="text-sm" />
+<p-confirmDialog />

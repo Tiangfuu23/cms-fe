@@ -4,6 +4,7 @@ import { Subscription } from 'rxjs';
 import { ToastService } from '../../services/featService/toast.service';
 import { StorageKeys } from '../../shared/constants/Constants.class';
 import { ConfirmationService } from 'primeng/api';
+import { SupabaseService } from '../../services/beService/supabase.service';
 @Component({
   selector: 'app-category',
   templateUrl: './category.component.html',
@@ -37,9 +38,12 @@ export class CategoryComponent implements OnInit, OnDestroy{
   // subscription
   getCategorySub !: Subscription;
 
-  constructor(private categoryService : CategoryService, private toastService : ToastService, private confirmationService : ConfirmationService){
-
-  }
+  constructor(
+    private categoryService : CategoryService,
+    private toastService : ToastService,
+    private confirmationService : ConfirmationService,
+    private supabaseService : SupabaseService
+  ){}
 
   ngOnInit(): void {
     this.userInfo = JSON.parse(localStorage.getItem(StorageKeys.USER_INFO)!);
@@ -101,15 +105,16 @@ export class CategoryComponent implements OnInit, OnDestroy{
   handleSaveCateDialog(){
     if(this.dialog.isEditDialog){
       const payload =  {
-        id: this.dialog.selectedCategory?.id,
+        id: this.dialog.selectedCategory!.id,
         categoryName: this.dialog.categoryName
       }
       this.categoryService.updateCategory(payload.id!, payload).subscribe({
-        next: (res) => {
+        next: async (res) => {
           console.log(res);
-          this.toastService.showSucces("Cập nhật thành công!");
+          await this.supabaseService.updateCategory(payload);
           this.initCategories();
           this.hideCateDialog();
+          this.toastService.showSucces("Cập nhật thành công!");
         },
         error: (error) => {
           console.log(error);
@@ -122,11 +127,17 @@ export class CategoryComponent implements OnInit, OnDestroy{
         userId: this.userInfo.id,
       }
       this.categoryService.createCategory(payload).subscribe({
-        next: (res) => {
+        next: async (res) => {
           console.log(res);
-          this.toastService.showSucces("Thêm mới thành công!");
+          const newlyCreatedCateId = res.id;
+          const data = await this.supabaseService.insertCategory({
+            id : newlyCreatedCateId,
+            ...payload
+          })
+          console.log('insert data in cate tbl in supabase', data);
           this.initCategories();
           this.hideCateDialog();
+          this.toastService.showSucces("Thêm mới thành công!");
         },
         error: (error) => {
           console.log(error);
@@ -151,10 +162,11 @@ export class CategoryComponent implements OnInit, OnDestroy{
 
       accept: () => {
         this.categoryService.deleteCategory(category.id).subscribe({
-          next: (res) => {
+          next: async (res) => {
+            await this.supabaseService.delelteCategory(category.id);
             console.log('delete category', res);
-            this.toastService.showSucces("Xóa category thành công!");
             this.initCategories();
+            this.toastService.showSucces("Xóa category thành công!");
           },
           error: (error) => {
             console.log(error);

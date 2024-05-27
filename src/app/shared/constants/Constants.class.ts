@@ -1,7 +1,8 @@
 export class Constant {
   public static readonly ROLES = {
     1: 'Admin',
-    2: 'Staff'
+    2: 'Manager',
+    3: 'Staff'
   }
 
   public static readonly PRODUCT_STATUS = {
@@ -16,7 +17,7 @@ export class Constant {
   public static readonly PAYMENT_METHOD = {
     'Cash' : 1,
     'Bank' : 2,
-    'Creadit card': 3
+    'Credit card': 3
   }
 }
 

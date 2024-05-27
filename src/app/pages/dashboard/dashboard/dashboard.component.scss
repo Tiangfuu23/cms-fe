@@ -32,3 +32,10 @@ div.card-header.user > div {
 .border-card-4 {
   border-left: 4px solid var(--bg-icon-color-4);
 }
+
+.card {
+  background: #fff;
+  padding: 0.75rem;
+  border-radius: var(--border-radius);
+  margin-top: 1rem;
+}

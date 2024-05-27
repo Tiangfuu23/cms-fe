@@ -2,6 +2,7 @@ import { Component } from '@angular/core';
 import { MenuItem } from 'primeng/api';
 import { Router } from '@angular/router';
 import { StorageKeys, Constant } from '../../constants/Constants.class';
+import { ConfirmationService } from 'primeng/api';
 @Component({
   selector: 'app-nav-menu',
   templateUrl: './nav-menu.component.html',
@@ -11,7 +12,7 @@ export class NavMenuComponent {
   items: MenuItem[] | undefined;
   userInfo: any;
   ROLES:any = Constant.ROLES;
-  constructor(private router: Router){
+  constructor(private router: Router, private confirmationService: ConfirmationService){
     this.userInfo = JSON.parse(localStorage.getItem(StorageKeys.USER_INFO)!);
   }
 
@@ -51,6 +52,7 @@ export class NavMenuComponent {
                   {
                       label: 'Settings',
                       icon: 'pi pi-cog',
+                      routerLink: '/profile'
                   },
                   {
                       label: 'Logout',
@@ -64,8 +66,23 @@ export class NavMenuComponent {
           }
       ];
   }
-
   logout() {
-    this.router.navigate(["/login"]);
+    this.confirmationService.confirm({
+      message: 'Bạn có muốn đăng xuất?',
+      header: 'Xác nhận đăng xuất',
+      icon: 'pi pi-info-circle',
+      acceptButtonStyleClass:"p-button-danger p-button-text",
+      rejectButtonStyleClass:"p-button-text p-button-text",
+      acceptIcon:"none",
+      rejectIcon:"none",
+
+      accept: () => {
+        this.router.navigate(["/login"]);
+      }
+    });
+  }
+
+  getAvatarLabel(){
+    return this.userInfo.fullname.split(" ").at(-1).at(0);
   }
 }

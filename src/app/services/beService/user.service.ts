@@ -8,7 +8,23 @@ import { Observable } from 'rxjs';
 export class UserService extends BaseService {
   private url : string = '/User'
 
-  UpdatePassword(payload:any) : Observable<any>{
+  updatePassword(payload:any) : Observable<any>{
     return this.put(`${this.url}/${payload.userId}/UpdatePassword`, payload)
+  }
+
+  getUsers() : Observable<any> {
+    return this.get(this.url);
+  }
+
+  getUserById(id:number) : Observable<any> {
+    return this.get(`${this.url}/${id}`);
+  }
+
+  createUser(payload:any) : Observable<any> {
+    return this.post(this.url, payload);
+  }
+
+  updateUser(userId:number, payload: any) : Observable<any> {
+    return this.put(`${this.url}/${userId}`, payload);
   }
 }

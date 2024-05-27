@@ -44,6 +44,10 @@ import { DropdownModule } from 'primeng/dropdown';
 import { InputNumberModule } from 'primeng/inputnumber';
 import { InputSwitchModule } from 'primeng/inputswitch';
 import { BillComponent } from './pages/bill/bill.component';
+import { UserSettingComponent } from './pages/user-setting/user-setting.component';
+import { TabMenuModule } from 'primeng/tabmenu';
+import { CalendarModule } from 'primeng/calendar';
+import { ChartModule } from 'primeng/chart';
 
 @NgModule({
   declarations: [
@@ -55,6 +59,7 @@ import { BillComponent } from './pages/bill/bill.component';
     CategoryComponent,
     ProductComponent,
     BillComponent,
+    UserSettingComponent,
   ],
   imports: [
     BrowserModule,
@@ -88,7 +93,10 @@ import { BillComponent } from './pages/bill/bill.component';
     TagModule,
     DropdownModule,
     InputNumberModule,
-    InputSwitchModule
+    InputSwitchModule,
+    TabMenuModule,
+    CalendarModule,
+    ChartModule
   ],
   providers: [
     {
