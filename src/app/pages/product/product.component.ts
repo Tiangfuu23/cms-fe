@@ -7,6 +7,7 @@ import { ProductService } from '../../services/beService/product.service';
 import { FormGroup, FormBuilder, Validators } from '@angular/forms';
 import { CategoryService } from '../../services/beService/category.service';
 import { SupabaseService } from '../../services/beService/supabase.service';
+import { Table } from 'primeng/table';
 @Component({
   selector: 'app-product',
   templateUrl: './product.component.html',
@@ -14,6 +15,7 @@ import { SupabaseService } from '../../services/beService/supabase.service';
 })
 export class ProductComponent implements OnInit, OnDestroy {
   categories: any[] = [];
+  ori_products : any [] = [];
   products : any[] = [];
   product_status: any[] = [];
   userInfo : any;
@@ -53,6 +55,14 @@ export class ProductComponent implements OnInit, OnDestroy {
   // subscription
   productSub !: Subscription;
   categorySub !: Subscription;
+
+  // filtering
+  ACTIVE = [{active: true, desc: 'Active'}, { active: false, desc: 'Inactive'}]
+
+  filter = {
+    status: null,
+    active: null
+  }
   constructor(
     private productService : ProductService,
     private toastService : ToastService,
@@ -66,6 +76,7 @@ export class ProductComponent implements OnInit, OnDestroy {
 
   ngOnInit(): void {
     this.userInfo = JSON.parse(localStorage.getItem(StorageKeys.USER_INFO)!);
+    this.checkToken();
     this.initCategories();
     this.initProducts();
     this.initProductFrm();
@@ -75,6 +86,14 @@ export class ProductComponent implements OnInit, OnDestroy {
   ngOnDestroy(): void {
     this.productSub?.unsubscribe();
     this.categorySub?.unsubscribe();
+  }
+
+  checkToken() {
+    this.productService.checkToken().subscribe({
+      error: (err) => {
+        console.log(err);
+      }
+    })
   }
 
   initCategories(){
@@ -98,6 +117,7 @@ export class ProductComponent implements OnInit, OnDestroy {
       next : (res) => {
         // console.log(res);
         this.products = res;
+        this.ori_products = JSON.parse(JSON.stringify(this.products));
         this.mapCateogryId2ProductCnt.clear();
         this.products.forEach(p => {
           this.mapCateogryId2ProductCnt.set(p.category.id, (this.mapCateogryId2ProductCnt.get(p.category.id) ?? 0) + 1 );
@@ -188,9 +208,10 @@ export class ProductComponent implements OnInit, OnDestroy {
     if(this.dialog.isEditDialog){
       payload.id = this.dialog.selectedProduct?.id!;
       this.productService.updateProduct(payload.id!, payload).subscribe({
-        next: (res) => {
+        next: async (res) => {
           // console.log(res);
           this.toastService.showSucces("Cập nhật thành công!");
+          await this.supabaseService.updateProduct(payload)
           this.initProducts();
           this.hideProductFrm();
         },
@@ -292,4 +313,25 @@ export class ProductComponent implements OnInit, OnDestroy {
     return true;
   }
 
+  handleSearchFilter(table: Table, $event : any){
+    table.filterGlobal($event.target.value, 'contains');
+  }
+
+  handleFilterStatusChange(event: any) {
+    const value = event.value;
+    if(!value){
+      this.products = JSON.parse(JSON.stringify(this.ori_products));
+    }else{
+      this.products = this.ori_products.filter(e => e.status === value.id);
+    }
+  }
+
+  handleFilterActiveChange(event : any) {
+    const value = event.value;
+    if(!value){
+      this.products = JSON.parse(JSON.stringify(this.ori_products));
+    }else{
+      this.products = this.ori_products.filter(e => e.active === value.active);
+    }
+  }
 }

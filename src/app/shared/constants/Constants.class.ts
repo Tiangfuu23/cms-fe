@@ -1,8 +1,8 @@
 export class Constant {
   public static readonly ROLES = {
-    1: 'Admin',
-    2: 'Manager',
-    3: 'Staff'
+    'Admin' : 1,
+    'Manager': 2,
+    'Staff' : 3
   }
 
   public static readonly PRODUCT_STATUS = {

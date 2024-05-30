@@ -1,4 +1,4 @@
-<p-menu [model]="items" styleClass="h-full w-full border-noround">
+<p-menu [model]="items" styleClass="h-full w-full border-noround overflow-auto custom-scrollbar">
   <ng-template pTemplate="start">
       <span class="flex align-items-center gap-1 px-2 py-2">
           <img src="assets/icons/favicon.ico" alt="logo-coffe" class="logo">
@@ -22,7 +22,7 @@
       <span class="text-primary font-bold">{{ item.label }}</span>
   </ng-template>
   <ng-template pTemplate="item" let-item>
-      <a pRipple class="flex align-items-center p-menuitem-link" [routerLink]="item.routerLink" routerLinkActive="active-link">
+      <a *ngIf="canVisible(item.roles)" pRipple class="flex align-items-center p-menuitem-link" [routerLink]="item.routerLink" routerLinkActive="active-link">
           <span [class]="item.icon"></span>
           <span class="ml-2">{{ item.label }}</span>
       </a>

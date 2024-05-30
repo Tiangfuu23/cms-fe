@@ -8,6 +8,7 @@ import { CategoryComponent } from './pages/category/category.component';
 import { ProductComponent } from './pages/product/product.component';
 import { BillComponent } from './pages/bill/bill.component';
 import { UserSettingComponent } from './pages/user-setting/user-setting.component';
+import { UserComponent } from './pages/user/user.component';
 const routes: Routes = [
   {path: '', redirectTo: 'dashboard', pathMatch: 'full'},
   {path: 'login', component: LoginComponent},
@@ -16,6 +17,7 @@ const routes: Routes = [
   {path: 'product', component: ProductComponent, canActivate: [AuthGuard]},
   {path: 'bill', component: BillComponent, canActivate: [AuthGuard]},
   {path: 'profile', component: UserSettingComponent, canActivate: [AuthGuard]},
+  {path: 'user', component: UserComponent, canActivate: [AuthGuard]},
   {path: '**', component: PageNotFoundComponent},
 ];
 

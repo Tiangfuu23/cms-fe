@@ -27,4 +27,16 @@ export class UserService extends BaseService {
   updateUser(userId:number, payload: any) : Observable<any> {
     return this.put(`${this.url}/${userId}`, payload);
   }
+
+  getBillsByUserId(userId: number) : Observable<any> {
+    return this.get(`${this.url}/${userId}/Bill`);
+  }
+
+  activeUser(userId: number) : Observable<any>{
+    return this.put(`${this.url}/${userId}/Active`, {});
+  }
+
+  inactiveUser(userId : number) : Observable<any> {
+    return this.put(`${this.url}/${userId}/Inactive`, {});
+  }
 }

@@ -5,6 +5,7 @@ import { ToastService } from '../../services/featService/toast.service';
 import { StorageKeys } from '../../shared/constants/Constants.class';
 import { ConfirmationService } from 'primeng/api';
 import { SupabaseService } from '../../services/beService/supabase.service';
+import { Table } from 'primeng/table';
 @Component({
   selector: 'app-category',
   templateUrl: './category.component.html',
@@ -47,11 +48,21 @@ export class CategoryComponent implements OnInit, OnDestroy{
 
   ngOnInit(): void {
     this.userInfo = JSON.parse(localStorage.getItem(StorageKeys.USER_INFO)!);
+    if(this.userInfo.roleId )
+    this.checkToken();
     this.initCategories();
   }
 
   ngOnDestroy(): void {
     this.getCategorySub?.unsubscribe();
+  }
+
+  checkToken(){
+    this.categoryService.checkToken().subscribe({
+      error: (error) => {
+        console.log(error);
+      }
+    })
   }
 
   initCategories(){
@@ -173,8 +184,11 @@ export class CategoryComponent implements OnInit, OnDestroy{
             this.toastService.showError(error.error.Message);
           }
         })
-
       },
-  });
+    });
+  }
+
+  handleSearchFilter(table: Table, $event : any){
+    table.filterGlobal($event.target.value, 'contains');
   }
 }

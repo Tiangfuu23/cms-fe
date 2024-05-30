@@ -27,4 +27,8 @@ export class ProductService extends BaseService{
   deleteProduct(productId: number) : Observable<any> {
     return this.delete(`${this.url}/${productId}`);
   }
+
+  checkToken() : Observable<any> {
+    return this.get(`${this.url}/Checktoken`);
+  }
 }

@@ -1,0 +1,239 @@
+<div class="w-full h-full grid grid-nogutter">
+  <div class="col-2 h-full">
+    <app-nav-menu></app-nav-menu>
+  </div>
+  <div class="col-10 surface-ground flex align-items-center justify-content-center">
+    <div class="w-full h-full flex justify-content-center align-items-center"  *ngIf="loading">
+      <p-progressSpinner
+        styleClass="w-4rem h-4rem"
+        strokeWidth="8"
+        fill="var(--surface-ground)"
+      />
+    </div>
+    <div class="card p-4 shadow-1 w-full" style="height: 90%" *ngIf="!loading">
+      <p-table [value]="users" [rowHover]="true"
+      [scrollable]="true"
+      scrollHeight="400px"
+      rowGroupMode="subheader"
+      groupRowsBy="role.roleId"
+      [globalFilterFields]="['fullname', 'username', 'gender', 'email']"
+      #table
+      >
+        <ng-template pTemplate="caption">
+            <div class="flex align-items-center justify-content-between mb-1">
+                Users
+
+                <div class="filter ml-auto flex gap-1">
+                  <p-dropdown
+                    [options]="ONLINE"
+                    optionLabel="status"
+                    [showClear]="true"
+                    placeholder="Search by status"
+                    (onChange)="handleFilterByStatus($event)"
+                  >
+                  </p-dropdown>
+
+                  <p-iconField iconPosition="left">
+                    <p-inputIcon>
+                      <i class="pi pi-search"></i>
+                    </p-inputIcon>
+                    <input
+                      class="h-full"
+                      pInputText
+                      type="text"
+                      (input)="handleSearchFilter(table, $event)"
+                      placeholder="Search by key"
+                    />
+                  </p-iconField>
+                </div>
+
+                <p-button icon="pi pi-plus" (onClick)="showCreateUserDialog()"/>
+            </div>
+        </ng-template>
+        <ng-template pTemplate="header">
+            <tr>
+                <th>
+                  Id
+                </th>
+                <th>
+                  Name
+                </th>
+                <th>
+                  Username
+                </th>
+                <th>Gender</th>
+                <th>Email</th>
+                <th>Birthday</th>
+                <th>Status</th>
+                <th>Action</th>
+                <th>Active</th>
+            </tr>
+        </ng-template>
+        <ng-template pTemplate="groupheader" let-user>
+          <tr pRowGroupHeader>
+              <td colspan="9">
+                  <span class="font-bold">{{user.role.description}}</span>
+              </td>
+          </tr>
+      </ng-template>
+      <ng-template pTemplate="groupfooter" let-user>
+          <tr >
+              <td colspan="9" class="font-bold text-right">
+                  Total users: {{mapRoleId2UserCnt.get(user.role.roleId)}}
+              </td>
+          </tr>
+      </ng-template>
+        <ng-template pTemplate="body" let-user>
+            <tr>
+                <td>{{user.id}}</td>
+                <td>{{user.fullname}}</td>
+                <td>{{user.username}}</td>
+                <td>{{user.gender}}</td>
+                <td>{{user.email}}</td>
+                <td>{{user.birthday | date: 'dd/MM/yyyy'}}</td>
+                <td>
+                  <p-tag >
+                    <span class="user-badge" [ngClass]="{'status-online': mapUserId2UserModelOnlineTracking.has(user.id), 'status-offline': !mapUserId2UserModelOnlineTracking.has(user.id) }">
+                      {{getUserStatusString(user.id)}}
+                    </span>
+                  </p-tag>
+                </td>
+                <td>
+                  <p-button icon="pi pi-pen-to-square" size="small"
+                  [outlined]="true"
+                  (onClick)="showEditUserDialog(user)"
+                  />
+                  <p-button icon="pi pi-key" size="small"
+                  [outlined]="true"
+                  (onClick)="showChangePassworDialog(user)"
+                  />
+                </td>
+                <td>
+                  <p-inputSwitch [(ngModel)]="user.active" (onChange)="handleActiveUser($event, user)" />
+                </td>
+            </tr>
+        </ng-template>
+    </p-table>
+    </div>
+  </div>
+</div>
+<p-dialog [header]="dialog.header" [modal]="true" [(visible)]="dialog.isVisibleDialog" [style]="{ width: '34rem', height:'40rem', }">
+  <div class="dialog-content-container h-full w-full flex flex-column justify-content-between">
+    <form [formGroup]="userForm">
+      <div class="flex align-items-center gap-3 mb-3">
+        <label for="username" class="font-semibold w-6rem">Username:</label>
+        <input
+            *ngIf="dialog.isCreateDialog"
+            pInputText
+            id="username"
+            formControlName="username"
+            class="flex-auto"
+            placeholder="Enter username"
+            />
+        <input
+            *ngIf="dialog.isEditDialog"
+            pInputText
+            id="username"
+            [value]="dialog.selectedUser.username"
+            class="flex-auto"
+            [disabled]="true"
+            />
+      </div>
+
+      <div *ngIf="this.dialog.isCreateDialog" class="flex align-items-center gap-3 mb-3">
+        <label for="password" class="font-semibold w-6rem">Password:</label>
+        <input
+            pInputText
+            id="password"
+            formControlName="password"
+            class="flex-auto"
+            placeholder="Enter password"
+            type="password"
+            />
+      </div>
+
+      <div class="flex align-items-center gap-3 mb-3">
+        <label for="fullname" class="font-semibold w-6rem">Fullname:</label>
+        <input
+            pInputText
+            id="description"
+            formControlName="fullname"
+            class="flex-auto"
+            placeholder="Enter fullname"
+            />
+      </div>
+      <div class="flex align-items-center gap-3 mb-3">
+        <label for="email" class="font-semibold w-6rem">Email:</label>
+        <input
+            pInputText
+            id="email"
+            formControlName="email"
+            class="flex-auto"
+            placeholder="Enter email"
+            />
+      </div>
+      <div class="flex align-items-center gap-3 mb-3">
+        <label for="gender" class="font-semibold w-6rem">Gender:</label>
+
+        <p-dropdown
+                  id="gender"
+                  class="flex-auto"
+                  styleClass="w-full"
+                  formControlName="gender"
+                  [options]="GENDER"
+                  placeholder="Select gender"/>
+      </div>
+
+      <div class="flex align-items-center gap-3 mb-3">
+        <label for="birthday" class="font-semibold w-6rem">Birthday:</label>
+        <p-calendar id="birthday" formControlName="birthday"
+                dateFormat="dd/mm/yy" placeholder="select date of birth" [showClear]="true"/>
+      </div>
+
+      <div class="flex align-items-center gap-3 mb-3">
+        <label for="role" class="font-semibold w-6rem">Role</label>
+
+        <p-dropdown
+          id="role"
+          class="flex-auto"
+          styleClass="w-full"
+          scrollHeight="120px"
+          formControlName="role"
+          [options]="ROLES"
+          optionLabel="description"
+          [filter]="true"
+          filterBy="description"
+          placeholder="Select role" />
+      </div>
+
+    </form>
+    <div class="flex justify-content-end gap-2">
+        <p-button label="Cancel" severity="secondary" (click)="hideUserDialog()" />
+        <p-button label="Save" (click)="handleSaveUserDialog()" />
+    </div>
+  </div>
+</p-dialog>
+
+
+<p-dialog [header]="changePasswordDialog.header" [modal]="true" [(visible)]="changePasswordDialog.isVisibleDialog" [style]="{ width: '30rem', height:'15rem', }">
+  <div class="dialog-content-container h-full w-full flex flex-column justify-content-between">
+    <div class="flex align-items-center gap-3 mb-3">
+      <label for="password" class="font-semibold w-8rem">New password:</label>
+      <input
+          pInputText
+          id="password"
+          [(ngModel)]="changePasswordDialog.newPassword"
+          class="flex-auto"
+          placeholder="Enter new password"
+          type="password"
+          />
+    </div>
+    <div class="flex justify-content-end gap-2">
+        <p-button label="Cancel" severity="secondary" (click)="hideChangePasswordDialog()" />
+        <p-button label="Save" (click)="handleSaveChangePasswordDialog()" />
+    </div>
+  </div>
+</p-dialog>
+
+<p-toast styleClass="text-sm" />
+<p-confirmDialog />

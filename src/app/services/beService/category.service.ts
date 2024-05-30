@@ -32,4 +32,8 @@ export class CategoryService extends BaseService{
   getProductsByCategoryId(categoryId:number) : Observable<any> {
     return this.get(`${this.url}/${categoryId}/Product`)
   }
+
+  checkToken() : Observable<any> {
+    return this.get(`${this.url}/Checktoken`);
+  }
 }

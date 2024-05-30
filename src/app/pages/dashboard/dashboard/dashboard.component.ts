@@ -11,22 +11,20 @@ import { SupabaseService } from '../../../services/beService/supabase.service';
   styleUrl: './dashboard.component.scss',
 })
 export class DashboardComponent implements OnInit {
-  loading: boolean = true;
+  loading: boolean = false;
   userInfo: any;
-  dashboardInfo = {
-    userCnt: 0,
-  };
 
   dashboardInfoFake = {
-    categoryCnt: 0,
-    productCnt: 0,
-    revenue: 0,
-    // userCnt: 0,
+    categoryCnt: -1,
+    productCnt: -1,
+    revenue: -1,
+    userCnt: -1,
   };
   // Entities List
   billsList: any[] | null = [];
   categoriesList: any[] | null = [];
   productsList: any[] | null = [];
+  usersList : any [] | null = [];
   //
   mapUserId2UserModel!: Map<number, IAuthModel>;
   mapProductId2Product: Map<number, any> = new Map();
@@ -38,13 +36,16 @@ export class DashboardComponent implements OnInit {
   options: any;
   bestSellers: any;
   constructor(
-    private dashboardService: DashboardService,
+    // private dashboardService: DashboardService,
     private toastService: ToastService,
     private onlineUserService: OnlineUserService,
-    private supabaseService: SupabaseService
-  ) {}
+    private supabaseService: SupabaseService,
+    private dashboardService : DashboardService
+  ) {
+  }
 
   ngOnInit(): void {
+    this.checkAuthorization();
     this.userInfo = JSON.parse(localStorage.getItem(StorageKeys.USER_INFO)!);
     this.onlineUserService.subscribe((map) => {
       this.mapUserId2UserModel = map;
@@ -53,8 +54,6 @@ export class DashboardComponent implements OnInit {
     this.connectSupabase();
     this.initLineCharts();
     this.initBestSellersTbl();
-    this.initDashboardInfo();
-
   }
 
   connectSupabase() {
@@ -62,6 +61,7 @@ export class DashboardComponent implements OnInit {
     this.subscribeCategoryTable();
     this.subscribeProductTable();
     this.subscribeBillTable();
+    this.subscribeUserTable();
     // this.subscribeBillProductTable();
   }
 
@@ -69,7 +69,7 @@ export class DashboardComponent implements OnInit {
     this.categoriesList = await this.supabaseService.getCategories();
     this.productsList = await this.supabaseService.getProducts();
     this.billsList = await this.supabaseService.getBills();
-
+    this.usersList = await this.supabaseService.getUsers();
     this.productsList?.forEach((p) => {
       this.mapProductId2Product.set(p.id, p);
     });
@@ -84,6 +84,7 @@ export class DashboardComponent implements OnInit {
       categoryCnt: this.categoriesList?.length ?? -1,
       productCnt: this.productsList?.length ?? -1,
       revenue,
+      userCnt: this.usersList?.length ?? -1
     };
   }
 
@@ -139,21 +140,34 @@ export class DashboardComponent implements OnInit {
     });
   }
 
-  initDashboardInfo() {
-    this.loading = true;
-    this.dashboardService.getDashboardIn4().subscribe({
-      next: (res) => {
-        console.log('Response from init dashboardInfo', res);
-        this.dashboardInfo = { ...res.dashboardInfo };
-        this.loading = false;
-      },
-      error: (err) => {
-        console.log(err);
-        this.toastService.showError(err.error.Message);
-        this.loading = false;
-      },
+  subscribeUserTable() {
+    this.supabaseService.subscribeUserTable((payload: any) => {
+      console.log(payload);
+      switch (payload.eventType) {
+        case 'INSERT':
+          this.dashboardInfoFake.userCnt += 1;
+          break;
+        case 'DELETE':
+          this.dashboardInfoFake.userCnt -= 1;
+      }
     });
   }
+
+  // initDashboardInfo() {
+  //   this.loading = true;
+  //   this.dashboardService.getDashboardIn4().subscribe({
+  //     next: (res) => {
+  //       console.log('Response from init dashboardInfo', res);
+  //       this.dashboardInfo = { ...res.dashboardInfo };
+  //       this.loading = false;
+  //     },
+  //     error: (err) => {
+  //       console.log(err);
+  //       this.toastService.showError(err.error.Message);
+  //       this.loading = false;
+  //     },
+  //   });
+  // }
 
   async initLineCharts() {
     const revenueStatistic = await this.supabaseService.getRevenueStatisticByYear(this.selectedYear!);
@@ -244,5 +258,16 @@ export class DashboardComponent implements OnInit {
   async initBestSellersTbl(){
     this.bestSellers = await this.supabaseService.getBestSellers();
     console.log(this.bestSellers);
+  }
+
+  checkAuthorization(){
+    this.dashboardService.getDashboardIn4().subscribe({
+      next: (res) => {
+        console.log(res);
+      },
+      error: (res) => {
+        console.log(res);
+      }
+    })
   }
 }

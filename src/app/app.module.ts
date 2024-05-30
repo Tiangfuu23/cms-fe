@@ -47,7 +47,9 @@ import { BillComponent } from './pages/bill/bill.component';
 import { UserSettingComponent } from './pages/user-setting/user-setting.component';
 import { TabMenuModule } from 'primeng/tabmenu';
 import { CalendarModule } from 'primeng/calendar';
+import { SkeletonModule } from 'primeng/skeleton';
 import { ChartModule } from 'primeng/chart';
+import { UserComponent } from './pages/user/user.component';
 
 @NgModule({
   declarations: [
@@ -60,6 +62,7 @@ import { ChartModule } from 'primeng/chart';
     ProductComponent,
     BillComponent,
     UserSettingComponent,
+    UserComponent,
   ],
   imports: [
     BrowserModule,
@@ -96,7 +99,8 @@ import { ChartModule } from 'primeng/chart';
     InputSwitchModule,
     TabMenuModule,
     CalendarModule,
-    ChartModule
+    SkeletonModule,
+    ChartModule,
   ],
   providers: [
     {

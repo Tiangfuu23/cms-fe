@@ -3,13 +3,13 @@ import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { LoginService } from '../../services/beService/login.service';
 import { ForgetPasswordService } from '../../services/beService/forget-password.service';
 import { ToastService } from '../../services/featService/toast.service';
-import { StorageKeys } from '../../shared/constants/Constants.class';
+import { Constant, StorageKeys } from '../../shared/constants/Constants.class';
 import { UserService } from '../../services/beService/user.service';
 import { Router } from '@angular/router';
 import { AuthStateService } from '../../shared/app-state/auth-state.service';
 import { SupabaseService } from '../../services/beService/supabase.service';
 import { Subscription } from 'rxjs';
-
+import { INIT_AUTH_MODEL } from '../../models/authModel';
 interface OTP {
   otpCodeId : number,
   otpCodeValue : string
@@ -88,6 +88,8 @@ export class LoginComponent implements OnInit, OnDestroy {
     this.initializeForgetPasswordForm();
     this.initializeUpdatePasswordForm();
     this.supabaseService.unsubscribeTrackingChannel();
+    this.supabaseService.unsubscribeUserAccountStateChannel();
+    this.authStateService.dispatch(INIT_AUTH_MODEL)
   }
 
   ngOnDestroy(): void {
@@ -145,7 +147,8 @@ export class LoginComponent implements OnInit, OnDestroy {
           birthday: new Date(res.user.birthday)
         })
         this.loading = false;
-        this.router.navigate(['dashboard']);
+        if(res.user.role.roleId === Constant.ROLES.Admin || res.user.role.roleId === Constant.ROLES.Manager) this.router.navigate(['dashboard']);
+        else this.router.navigate(['bill'])
       },
       error: (err) => {
         console.log(err);
@@ -154,7 +157,7 @@ export class LoginComponent implements OnInit, OnDestroy {
         }else if(err.error.Message == 'Mật khẩu không chính xác! Vui lòng kiểm tra lại.'){
           this.setLoginValidator(false, false, false, true, "Mật khẩu không chính xác!");
         }else{
-          this.toastService.showError("Lỗi kết nối tới server");
+          this.toastService.showError(err.error.Message ?? "Lỗi kết nối tới server");
         }
         this.loading = false;
       }

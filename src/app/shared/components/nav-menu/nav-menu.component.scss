@@ -5,3 +5,19 @@
 .active-link {
   background-color: rgba(229, 231, 235, 0.6);
 }
+.overflow-auto {
+  overflow: auto;
+}
+:host ::ng-deep {
+  ::-webkit-scrollbar {
+    width: 3px;
+  }
+  ::-webkit-scrollbar-thumb {
+    background-color: #ccc;
+    border-radius: 2rem;
+  }
+  ::-webkit-scrollbar-track{
+    color: #fff;
+    background-color: #fff;
+  }
+}

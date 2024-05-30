@@ -17,14 +17,53 @@
     </div>
     <div class="card p-4 shadow-1 w-full" style="height: 90%" *ngIf="!loading">
       <p-table
+        #table
         [value]="bills"
         dataKey="id"
         [scrollable]="true"
         scrollHeight="400px"
+        [globalFilterFields]="['user.fullname']"
       >
         <ng-template pTemplate="caption">
-          <div class="flex align-items-center justify-content-between">
+          <div class="flex align-items-center justify-content-between mb-1">
             Bills
+
+            <div class="filter ml-auto flex gap-1">
+              <p-dropdown
+                [options]="paymentMethods"
+                [(ngModel)]="filter.paymentMethod"
+                optionLabel="description"
+                [showClear]="true"
+                placeholder="Search by payment method"
+                (onChange)="handleFilterByPaymentMethod($event)"
+              >
+              </p-dropdown>
+
+              <p-calendar
+                [(ngModel)]="filter.date"
+                dateFormat="dd/mm/yy"
+                placeholder="Search by date"
+                (ngModelChange)="handleFilterByDate($event)"
+                [showClear]="true"
+              />
+
+              <p-iconField
+                iconPosition="left"
+                *ngIf="this.userInfo.roleId === Constant.ROLES.Admin || this.userInfo.roleId === Constant.ROLES.Manager"
+              >
+                <p-inputIcon>
+                  <i class="pi pi-search"></i>
+                </p-inputIcon>
+                <input
+                  class="h-full"
+                  pInputText
+                  type="text"
+                  (input)="handleSearchFilter(table, $event)"
+                  placeholder="Search by creator"
+                />
+              </p-iconField>
+            </div>
+
             <p-button
               icon="pi pi-plus
                 "
@@ -38,8 +77,12 @@
             <th>Id</th>
             <th>Payment method</th>
             <th>Creator</th>
-            <th>Date</th>
-            <th>Total price</th>
+            <th  pSortableColumn="creationDate">
+              Date <p-sortIcon field="creationDate" />
+            </th>
+            <th pSortableColumn="totalPrice">
+              Total price <p-sortIcon field="totalPrice" />
+            </th>
             <th>Action</th>
           </tr>
         </ng-template>
@@ -96,11 +139,21 @@
                   <ng-template pTemplate="header">
                     <tr>
                       <th>Id</th>
-                      <th>Product name</th>
-                      <th>Category</th>
-                      <th>Price</th>
-                      <th>Quantity</th>
-                      <th>Subtotal</th>
+                      <th pSortableColumn="productName">
+                        Product name <p-sortIcon field="productName" />
+                      </th>
+                      <th pSortableColumn="categoryName" >
+                        Category <p-sortIcon field="categoryName" />
+                      </th>
+                      <th pSortableColumn="price">
+                        Price <p-sortIcon field="price" />
+                      </th>
+                      <th pSortableColumn="quantity">
+                        Quantity <p-sortIcon field="quantity" />
+                      </th>
+                      <th pSortableColumn="totalSubPrice" >
+                        Subtotal <p-sortIcon field="totalSubPrice" />
+                      </th>
                     </tr>
                   </ng-template>
                   <ng-template pTemplate="body" let-product>

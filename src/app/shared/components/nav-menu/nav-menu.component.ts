@@ -3,6 +3,7 @@ import { MenuItem } from 'primeng/api';
 import { Router } from '@angular/router';
 import { StorageKeys, Constant } from '../../constants/Constants.class';
 import { ConfirmationService } from 'primeng/api';
+import { AuthStateService } from '../../app-state/auth-state.service';
 @Component({
   selector: 'app-nav-menu',
   templateUrl: './nav-menu.component.html',
@@ -11,12 +12,25 @@ import { ConfirmationService } from 'primeng/api';
 export class NavMenuComponent {
   items: MenuItem[] | undefined;
   userInfo: any;
-  ROLES:any = Constant.ROLES;
-  constructor(private router: Router, private confirmationService: ConfirmationService){
-    this.userInfo = JSON.parse(localStorage.getItem(StorageKeys.USER_INFO)!);
+  ROLES:any = new Array(Object.keys(Constant.ROLES).length + 1);
+
+  constructor(
+    private router: Router,
+    private confirmationService: ConfirmationService,
+    private authSateService : AuthStateService
+  ){
   }
 
   ngOnInit() {
+      this.initRoles();
+      this.authSateService.getAuthData().subscribe({
+        next: (m) => {
+          this.userInfo = m;
+        },
+        error: (e) => {
+          console.log(e);
+        }
+      })
       this.items = [
           {
               separator: true
@@ -27,22 +41,32 @@ export class NavMenuComponent {
                   {
                       label: 'Dashboard',
                       icon: 'pi pi-home',
-                      routerLink: '/dashboard'
+                      routerLink: '/dashboard',
+                      roles: [Constant.ROLES.Admin, Constant.ROLES.Manager]
                   },
                   {
                     label: 'Category',
                     icon: 'pi pi-objects-column',
-                    routerLink: '/category'
+                    routerLink: '/category',
+                    roles: [Constant.ROLES.Admin, Constant.ROLES.Manager]
                   },
                   {
                     label: 'Product',
                     icon: 'pi pi-box',
-                    routerLink: '/product'
+                    routerLink: '/product',
+                    roles: [Constant.ROLES.Admin, Constant.ROLES.Manager]
                   },
                   {
                     label: 'Bill',
                     icon: 'pi pi-money-bill',
-                    routerLink: '/bill'
+                    routerLink: '/bill',
+                    roles: [Constant.ROLES.Admin, Constant.ROLES.Manager, Constant.ROLES.Staff]
+                  },
+                  {
+                    label: 'User',
+                    icon: 'pi pi-user',
+                    routerLink: '/user',
+                    roles: [Constant.ROLES.Admin, Constant.ROLES.Manager]
                   }
               ]
           },
@@ -52,12 +76,14 @@ export class NavMenuComponent {
                   {
                       label: 'Settings',
                       icon: 'pi pi-cog',
-                      routerLink: '/profile'
+                      routerLink: '/profile',
+                      roles: [Constant.ROLES.Admin, Constant.ROLES.Manager, Constant.ROLES.Staff]
                   },
                   {
                       label: 'Logout',
                       icon: 'pi pi-sign-out',
-                      command: () => this.logout()
+                      command: () => this.logout(),
+                      roles: [Constant.ROLES.Admin, Constant.ROLES.Manager, Constant.ROLES.Staff]
                   }
               ]
           },
@@ -84,5 +110,15 @@ export class NavMenuComponent {
 
   getAvatarLabel(){
     return this.userInfo.fullname.split(" ").at(-1).at(0);
+  }
+
+  initRoles(){
+    for(let [key,value] of Object.entries(Constant.ROLES)){
+      this.ROLES[value] = key
+    }
+  }
+
+  canVisible(roles : number[]){
+    return roles.indexOf(this.userInfo.roleId) !== -1;
   }
 }

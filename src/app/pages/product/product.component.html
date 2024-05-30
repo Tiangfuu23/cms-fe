@@ -2,8 +2,13 @@
   <div class="col-2 h-full">
     <app-nav-menu></app-nav-menu>
   </div>
-  <div class="col-10 surface-ground flex align-items-center justify-content-center">
-    <div class="w-full h-full flex justify-content-center align-items-center"  *ngIf="loading">
+  <div
+    class="col-10 surface-ground flex align-items-center justify-content-center"
+  >
+    <div
+      class="w-full h-full flex justify-content-center align-items-center"
+      *ngIf="loading"
+    >
       <p-progressSpinner
         styleClass="w-4rem h-4rem"
         strokeWidth="8"
@@ -11,100 +16,169 @@
       />
     </div>
     <div class="card p-4 shadow-1 w-full" style="height: 90%" *ngIf="!loading">
-      <p-table [value]="products" [rowHover]="true"
-      [scrollable]="true"
-      scrollHeight="400px"
-      rowGroupMode="subheader"
-      groupRowsBy="category.id"
+      <p-table
+        [value]="products"
+        [rowHover]="true"
+        [scrollable]="true"
+        scrollHeight="400px"
+        rowGroupMode="subheader"
+        groupRowsBy="category.id"
+        #table
+        [globalFilterFields]="['productName']"
       >
         <ng-template pTemplate="caption">
-            <div class="flex align-items-center justify-content-between">
-                Products
-                <p-button icon="pi pi-plus
-                " (onClick)="showCreateProductDialog()" />
+          <div class="flex align-items-center justify-content-between mb-1">
+            Products
+            <div class="filter ml-auto flex gap-1">
+              <p-dropdown
+                [options]="ACTIVE"
+                [(ngModel)]="filter.active"
+                optionLabel="desc"
+                [showClear]="true"
+                placeholder="Search by active"
+                class="ml-auto"
+                (onChange)="handleFilterActiveChange($event)"
+              >
+              </p-dropdown>
+
+              <p-dropdown
+                [options]="product_status"
+                [(ngModel)]="filter.status"
+                optionLabel="status"
+                [showClear]="true"
+                placeholder="Search by status"
+                class="ml-auto"
+                (onChange)="handleFilterStatusChange($event)"
+              >
+              </p-dropdown>
+
+              <p-iconField iconPosition="left">
+                <p-inputIcon>
+                  <i class="pi pi-search"></i>
+                </p-inputIcon>
+                <input
+                  class="h-full"
+                  pInputText
+                  type="text"
+                  (input)="handleSearchFilter(table, $event)"
+                  placeholder="Search by name"
+                />
+              </p-iconField>
             </div>
+
+            <p-button
+              icon="pi pi-plus
+                "
+              (onClick)="showCreateProductDialog()"
+            />
+          </div>
         </ng-template>
         <ng-template pTemplate="header">
-            <tr>
-                <th width="10%">Name</th>
-                <th width="25%">Description</th>
-                <th width="10%">Price</th>
-                <th width="17.5%">Status</th>
-                <th width="17.5%">Active</th>
-                <th width="20%">Action</th>
-            </tr>
+          <tr>
+            <th width="10%">
+              Name
+            </th>
+            <th width="25%">Description</th>
+            <th width="12%">
+              Price
+            </th>
+            <th width="17.5%">Status</th>
+            <th width="17.5%">Active</th>
+            <th width="18%">Action</th>
+          </tr>
         </ng-template>
         <ng-template pTemplate="groupheader" let-product>
           <tr pRowGroupHeader>
-              <td colspan="7">
-                  <span class="font-bold">{{product.category.categoryName}}</span>
-              </td>
+            <td colspan="7">
+              <span class="font-bold">{{ product.category.categoryName }}</span>
+            </td>
           </tr>
-      </ng-template>
-      <ng-template pTemplate="groupfooter" let-product>
-          <tr >
-              <td colspan="7" class="font-bold text-right">
-                  Total Products: {{mapCateogryId2ProductCnt.get(product.category.id)}}
-              </td>
-          </tr>
-      </ng-template>
-        <ng-template pTemplate="body" let-product>
-            <tr>
-                <td>{{product.productName}}</td>
-                <td>{{product.description}}</td>
-                <td>{{product.price | currency: 'USD'}}</td>
-                <td>
-                  <p-tag >
-                    <span class="product-badge {{getProductSeverity(product.status)}}">
-                      {{getProductStatusString(product.status)}}
-                    </span>
-                  </p-tag>
-                </td>
-                <td>
-                  <p-tag >
-                    <span class="product-badge {{getProductStatusSeverity(product.active)}}">
-                      {{product.active ? "ACTIVE" : "INACTIVE"}}
-                    </span>
-                  </p-tag>
-                </td>
-                <td>
-                  <p-button icon="pi pi-pen-to-square" size="small"
-                  [outlined]="true"
-                  (onClick)="showEditCateDialog(product)"
-                  />
-                  <p-button icon="pi pi-times" severity="danger" size="small"
-                  [outlined]="true"
-                  (onClick)="confirmDeleteProduct($event, product)"
-                  />
-                </td>
-            </tr>
         </ng-template>
-    </p-table>
+        <ng-template pTemplate="groupfooter" let-product>
+          <tr>
+            <td colspan="7" class="font-bold text-right">
+              Total Products:
+              {{ mapCateogryId2ProductCnt.get(product.category.id) }}
+            </td>
+          </tr>
+        </ng-template>
+        <ng-template pTemplate="body" let-product>
+          <tr>
+            <td>{{ product.productName }}</td>
+            <td>{{ product.description }}</td>
+            <td>{{ product.price | currency : "USD" }}</td>
+            <td>
+              <p-tag>
+                <span
+                  class="product-badge {{ getProductSeverity(product.status) }}"
+                >
+                  {{ getProductStatusString(product.status) }}
+                </span>
+              </p-tag>
+            </td>
+            <td>
+              <p-tag>
+                <span
+                  class="product-badge {{
+                    getProductStatusSeverity(product.active)
+                  }}"
+                >
+                  {{ product.active ? "ACTIVE" : "INACTIVE" }}
+                </span>
+              </p-tag>
+            </td>
+            <td>
+              <p-button
+                icon="pi pi-pen-to-square"
+                size="small"
+                [outlined]="true"
+                (onClick)="showEditCateDialog(product)"
+              />
+              <p-button
+                icon="pi pi-times"
+                severity="danger"
+                size="small"
+                [outlined]="true"
+                (onClick)="confirmDeleteProduct($event, product)"
+              />
+            </td>
+          </tr>
+        </ng-template>
+      </p-table>
     </div>
   </div>
 </div>
-<p-dialog [header]="dialog.header" [modal]="true" [(visible)]="dialog.isVisibleDialog" [style]="{ width: '30rem', height:'32rem' }">
-  <div class="dialog-content-container h-full w-full flex flex-column justify-content-between">
+<p-dialog
+  [header]="dialog.header"
+  [modal]="true"
+  [(visible)]="dialog.isVisibleDialog"
+  [style]="{ width: '30rem', height: '32rem' }"
+>
+  <div
+    class="dialog-content-container h-full w-full flex flex-column justify-content-between"
+  >
     <form [formGroup]="productFrm">
       <div class="flex align-items-center gap-3 mb-3">
         <label for="productName" class="font-semibold w-6rem">Name:</label>
         <input
-            pInputText
-            id="productName"
-            formControlName="productName"
-            class="flex-auto"
-            placeholder="Enter product name"
-            />
+          pInputText
+          id="productName"
+          formControlName="productName"
+          class="flex-auto"
+          placeholder="Enter product name"
+        />
       </div>
       <div class="flex align-items-center gap-3 mb-3">
-        <label for="description" class="font-semibold w-6rem">Description:</label>
+        <label for="description" class="font-semibold w-6rem"
+          >Description:</label
+        >
         <input
-            pInputText
-            id="description"
-            formControlName="description"
-            class="flex-auto"
-            placeholder="Enter description"
-            />
+          pInputText
+          id="description"
+          formControlName="description"
+          class="flex-auto"
+          placeholder="Enter description"
+        />
       </div>
 
       <div class="flex align-items-center gap-3 mb-3">
@@ -120,7 +194,8 @@
           optionLabel="categoryName"
           [filter]="true"
           filterBy="categoryName"
-          placeholder="Select a category" />
+          placeholder="Select a category"
+        />
       </div>
 
       <div class="flex align-items-center gap-3 mb-3">
@@ -136,7 +211,8 @@
           optionLabel="status"
           [filter]="true"
           filterBy="status"
-          placeholder="Select product status" />
+          placeholder="Select product status"
+        />
       </div>
 
       <div class="flex align-items-center gap-3 mb-3">
@@ -150,7 +226,8 @@
           locale="en-US"
           currency="USD"
           [minFractionDigits]="0"
-          [maxFractionDigits]="2" />
+          [maxFractionDigits]="2"
+        />
       </div>
       <div class="flex align-items-center gap-3 mb-3">
         <label for="active" class="font-semibold w-6rem">Active:</label>
@@ -158,12 +235,15 @@
       </div>
     </form>
     <div class="flex justify-content-end gap-2">
-        <p-button label="Cancel" severity="secondary" (click)="hideProductFrm()" />
-        <p-button label="Save" (click)="handleSaveProductDialog()" />
+      <p-button
+        label="Cancel"
+        severity="secondary"
+        (click)="hideProductFrm()"
+      />
+      <p-button label="Save" (click)="handleSaveProductDialog()" />
     </div>
   </div>
 </p-dialog>
-
 
 <p-toast styleClass="text-sm" />
 <p-confirmDialog />

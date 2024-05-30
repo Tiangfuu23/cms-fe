@@ -7,7 +7,9 @@ import { Subscription } from 'rxjs';
 import { ConfirmationService } from 'primeng/api';
 import { Constant, StorageKeys } from '../../shared/constants/Constants.class';
 import { SupabaseService } from '../../services/beService/supabase.service';
-
+import { Table } from 'primeng/table';
+import { AuthStateService } from '../../shared/app-state/auth-state.service';
+import { UserService } from '../../services/beService/user.service';
 interface IProductDetails  {
   id : number,
   productName: string,
@@ -27,6 +29,7 @@ export class BillComponent implements OnInit, OnDestroy {
   userInfo: any;
   loading: boolean = false;
   categories: any[] = [];
+  ori_bills: any[] = [];
   bills: any[] = [];
   products: any[] = [];
   paymentMethods: any[] = []
@@ -59,24 +62,40 @@ export class BillComponent implements OnInit, OnDestroy {
   cateSub !: Subscription;
   productSub !: Subscription;
 
-  // testing
-  // testDate : Date = new Date();
+  // filter
+  filter = {
+    date: null,
+    paymentMethod: null
+  }
 
+  //
+  Constant = Constant
   constructor(
     private billService : BillService,
     private categoryService: CategoryService,
     private productService : ProductService,
     private toastService : ToastService,
     private confirmationService: ConfirmationService,
-    private supabaseService: SupabaseService
+    private supabaseService: SupabaseService,
+    private authStateService: AuthStateService,
+    private userService: UserService
   ) {}
 
   ngOnInit(): void {
-    this.userInfo = JSON.parse(localStorage.getItem(StorageKeys.USER_INFO)!);
+    // this.userInfo = JSON.parse(localStorage.getItem(StorageKeys.USER_INFO)!);
+    this.authStateService.getAuthData().subscribe({
+      next: (m) => {
+        this.userInfo = m;
+        if(this.userInfo.id > -1) this.initBills();
+      },
+      error: (err) => {
+        console.log(err);
+      }
+    })
     this.initCategory();
     this.initProduct();
     this.initPaymentMethods();
-    this.initBills();
+    // this.initBills();
   }
 
   ngOnDestroy(): void {
@@ -89,7 +108,12 @@ export class BillComponent implements OnInit, OnDestroy {
     this.billSub = this.billService.getBills().subscribe({
       next: (res) => {
         console.log(res);
-        this.bills = res;
+        if(this.userInfo.roleId === Constant.ROLES.Admin || this.userInfo.roleId === Constant.ROLES.Manager){
+          this.bills = res;
+        }else{
+          this.bills = res.filter((bill : any) => bill.user.id === this.userInfo.id);
+        }
+        this.ori_bills = JSON.parse(JSON.stringify(this.bills));
         this.loading = false;
       },
       error: (error) => {
@@ -98,6 +122,21 @@ export class BillComponent implements OnInit, OnDestroy {
         this.loading = false;
       }
     })
+    // else {
+    //   this.billSub = this.userService.getBillsByUserId(this.userInfo.id).subscribe({
+    //     next: (res) => {
+    //       console.log(res);
+    //       this.bills = res;
+    //       this.ori_bills = JSON.parse(JSON.stringify(res));
+    //       this.loading = false;
+    //     },
+    //     error: (error) => {
+    //       console.log(error);
+    //       this.toastService.showError(error.error.Message);
+    //       this.loading = false;
+    //     }
+    //   })
+    // }
   }
 
   initCategory() {
@@ -210,9 +249,11 @@ export class BillComponent implements OnInit, OnDestroy {
 
   handleCateDropdownChange(){
     this.dialog.selectedProduct = null;
-    this.dialog.quantity = null,
-    this.dialog.price = null,
-    this.dialog.filtedProductList = this.products.filter(p => p.category.id === this.dialog.selectedCategory.id);
+    this.dialog.quantity = null;
+    this.dialog.price = null;
+    this.dialog.filtedProductList = this.products.filter(p => p.category.id === this.dialog.selectedCategory.id && p.active && p.status !== Constant.PRODUCT_STATUS.OUTOFSTOCK);
+    // console.log(this.dialog.filtedProductList);
+    // console.log(this.products);
   }
 
   handleProductDropdownChange() {
@@ -308,5 +349,28 @@ export class BillComponent implements OnInit, OnDestroy {
         })
       },
     });
+  }
+  handleSearchFilter(table: Table, event: any){
+    table.filterGlobal(event.target.value, 'contains');
+  }
+
+  handleFilterByDate(event : any){
+    const selectedDate = event;
+    this.bills = JSON.parse(JSON.stringify(this.ori_bills));
+    if(selectedDate){
+      this.bills = this.bills.filter(bill => {
+        const date1 = new Date(selectedDate);
+        const date2 = new Date(bill.creationDate);
+        return date1.getDate() === date2.getDate() && date1.getMonth() === date2.getMonth() && date1.getFullYear() === date2.getFullYear();
+      })
+    }
+  }
+
+  handleFilterByPaymentMethod(event: any){
+    const value = event.value;
+    this.bills = JSON.parse(JSON.stringify(this.ori_bills));
+    if(value){
+      this.bills = this.bills.filter(bill => bill.paymentMethod.id === value.id);
+    }
   }
 }

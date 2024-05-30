@@ -4,7 +4,6 @@ import { ConfigStateService } from "../../shared/app-state/config-state.service"
 
 // Channel
 const ONLINE_TRACKING_CHANNEL = 'online-tracking';
-
 // Table
 const CATEGORY_TABLE = 'Category';
 const PRODUCT_TABLE = 'Product';
@@ -37,6 +36,17 @@ interface IBillEnttiy {
   productDetails ?: any;
 }
 
+interface UserEntity {
+  id: number,
+  fullname: string,
+  username: string,
+  password: string,
+  birthday: string,
+  gender: string,
+  email: string,
+  roleId: number
+}
+
 interface IUserForUpdateEntity {
   id: number,
   fullname: string,
@@ -59,7 +69,7 @@ export class SupabaseService {
   private supabaseUrl : string = '';
   private supabaseKey : string = '';
   private trackingChannel !: RealtimeChannel;
-
+  private userStateChannel !: RealtimeChannel;
   constructor(private configService : ConfigStateService) {
     this.configService.subscribe((m) => {
       this.supabaseUrl = m.supabaseUrl;
@@ -142,6 +152,18 @@ export class SupabaseService {
     }
   }
     // User
+  async getUsers(){
+    const {data} = await this.supabaseClient.from(USER_TABLE).select("*");
+
+    return data;
+  }
+
+    async createUser(user : UserEntity){
+      const {data} = await this.supabaseClient.from(USER_TABLE).insert(user).select();
+
+      return data ? data[0] : {};
+    }
+
     async updateUser(userForUpdate : IUserForUpdateEntity){
       const {data} = await this.supabaseClient.from(USER_TABLE).update(userForUpdate).eq('id', userForUpdate.id).select();
 
@@ -153,6 +175,11 @@ export class SupabaseService {
       return data ? data[0] : {};
     }
 
+    async updateUserActiveState(payload : {id : number, active: boolean}){
+      const {data} = await this.supabaseClient.from(USER_TABLE).update(payload).eq('id', payload.id).select();
+
+      return data ? data[0] : {};
+    }
   // SUBSCRIPTION
   subscribeTrackingChannel(user : any, presenceSyncCb: (presenceState : any) => void) {
     this.trackingChannel = this.supabaseClient.channel(ONLINE_TRACKING_CHANNEL, {
@@ -198,12 +225,27 @@ export class SupabaseService {
     }).subscribe();
   }
 
+  subscribeUserTable(callback: (payload: any) => void){
+    this.supabaseClient.channel(`public:${USER_TABLE}`).on(`postgres_changes`, {event: '*', schema: 'public', table: `${USER_TABLE}`}, (payload : any) => {
+      callback(payload);
+    }).subscribe();
+  }
+
+  subscribeUserAccountStateTable(callback: (payload: any) => void){
+    this.userStateChannel = this.supabaseClient.channel(`public:${USER_TABLE}:active`).on(`postgres_changes`, {event: '*', schema: 'public', table: `${USER_TABLE}`}, (payload : any) => {
+      callback(payload);
+    }).subscribe();
+  }
+
   unsubscribeTrackingChannel(){
     console.log("Unsubscribe tracking channel called!");
     this.trackingChannel?.unsubscribe();
   }
 
-
+  unsubscribeUserAccountStateChannel(){
+    console.log("Unsubscribe user account state channel called!");
+    this.userStateChannel?.unsubscribe();
+  }
   // STATISTIC
   async getRevenueStatisticByYear(year: number){
     const {data} = await this.supabaseClient.rpc('get_revenue_sta_by_year', {'year': year}).select('*');

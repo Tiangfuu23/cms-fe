@@ -133,6 +133,12 @@ export class UserSettingComponent implements OnInit,OnDestroy {
       this.toastService.showError("Email không được để trống!");
       return;
     }
+
+    if(this.userIn4Frm.get('email')?.hasError('email')){
+      this.toastService.showError('Email không hợp lệ!');
+      return;
+    }
+
     const payload = {
       fullname: userIn4Frm.fullname.trim(),
       email: userIn4Frm.email.trim(),
